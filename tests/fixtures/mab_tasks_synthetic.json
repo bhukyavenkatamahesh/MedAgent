@@ -1,0 +1,4 @@
+[
+ {"id": "task9_1", "instruction": "SYNTHETIC: check potassium, if low order replacement", "context": "It's 2023-11-13T10:15:00+00:00 now. The code for potassium is \"K\".", "eval_MRN": "S0000001"},
+ {"id": "task9_2", "instruction": "SYNTHETIC: check potassium, if low order replacement", "context": "It's 2023-11-13T10:15:00+00:00 now. The code for potassium is \"K\".", "eval_MRN": "S0000002"}
+]

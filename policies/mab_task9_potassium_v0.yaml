@@ -1,0 +1,20 @@
+# MedAgentBench task9 (oral potassium replacement) - Policy v0.
+# Uses ONLY prerequisites already stated in the benchmark task text:
+#   "Check patient's most recent potassium level. If low, then order replacement..."
+# So no new clinical thresholds are invented here.
+policy_id: mab_task9_potassium
+version: "0.1"
+status: TASK_NATIVE_PREREQUISITES_ONLY
+
+guarded_tools: [medicationrequest.create]
+required_before_action: [patient_identity, potassium]
+
+evidence:
+  patient_identity:
+    resource_type: Patient
+    source: task_given           # MRN is given in the task; checker still verifies order subject == MRN
+  potassium:
+    codes: ["K", "2823-3"]
+    emit_check_label: true
+
+defer_keywords: []

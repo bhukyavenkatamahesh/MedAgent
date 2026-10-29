@@ -1,0 +1,24 @@
+# DEMO POLICY - synthetic values copied from synthetic_fhir_demo_data.json.
+# NOT clinically reviewed. NOT prescribing guidance.
+policy_id: demo_renal
+version: "0.1"
+status: DEMO_ONLY_NOT_CLINICALLY_REVIEWED
+
+guarded_tools: [medicationrequest.create]     # actions that need prerequisites
+required_before_action: [patient_identity, potassium, renal_function]
+
+evidence:
+  patient_identity:
+    resource_type: Patient
+    source: retrieved            # agent must GET the patient
+  potassium:
+    codes: ["2823-3", "K"]
+    min_value: 3.0               # demo: outside [3.0, 5.5] disqualifies
+    max_value: 5.5
+  renal_function:
+    codes: ["33914-3"]           # eGFR LOINC
+    max_age_hours: 24
+    min_value: 45                # demo: below 45 disqualifies the demo order
+    emit_check_label: true
+
+defer_keywords: [defer, clinician review, unavailable, hold]

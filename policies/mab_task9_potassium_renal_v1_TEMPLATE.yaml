@@ -1,0 +1,25 @@
+# TEMPLATE - renal overlay on MedAgentBench task9. DO NOT RUN until:
+#  (1) renal lab codes are confirmed on the MedAgentBench FHIR server
+#      (query e.g. Observation?patient=<MRN>&code=<code> and inspect what exists), and
+#  (2) the thresholds/freshness below are set and signed off by a clinical reviewer.
+policy_id: mab_task9_potassium_renal
+version: "1.0-draft"
+status: TEMPLATE_THRESHOLDS_NOT_SET
+
+guarded_tools: [medicationrequest.create]
+required_before_action: [patient_identity, potassium, renal_function]
+
+evidence:
+  patient_identity:
+    resource_type: Patient
+    source: task_given
+  potassium:
+    codes: ["K", "2823-3"]
+  renal_function:
+    codes: ["CREATININE_CODE_TODO"]   # TODO: confirm code(s) present on the server
+    max_age_hours: null                # TODO: clinician-reviewed freshness window
+    min_value: null                    # TODO: clinician-reviewed rule (or max_value for creatinine)
+    max_value: null
+    emit_check_label: true
+
+defer_keywords: [defer, clinician review, unavailable, hold]
