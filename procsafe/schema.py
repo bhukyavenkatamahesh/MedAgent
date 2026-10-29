@@ -39,7 +39,7 @@ class Episode:
     reference_time: Optional[datetime]  # "now" for freshness checks
     turns: list[Turn]
     terminal_result: Optional[str] = None   # PASS / FAIL from the ordinary benchmark grader
-    environment_resources: list[dict] = field(default_factory=list)  # everything in the EHR for this patient (optional; used only by oracle grader / defer analysis)
+    environment_resources: list[dict] = field(default_factory=list)  # optional EHR catalogue; never evidence unless returned in a turn
     meta: dict[str, Any] = field(default_factory=dict)
 
 

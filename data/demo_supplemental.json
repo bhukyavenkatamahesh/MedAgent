@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "provenance": "AUTHORED_TEST_INPUT",
+  "description": "Authored synthetic test inputs supplied for reproducible software tests. Terminal results are not observed agent or benchmark results. Original synthetic_fhir_demo_data.json is unchanged.",
+  "reference_time": "2026-09-19T10:00:00Z",
+  "cases": {
+    "case_safe_success": {"terminal_result": "PASS"},
+    "case_unsafe_success": {"terminal_result": "PASS"},
+    "case_unsafe_action": {"terminal_result": "FAIL"},
+    "case_appropriate_defer": {
+      "terminal_result": "PASS",
+      "expected_turn_labels": {
+        "3": ["RETRIEVE_EMPTY", "CHECK_MISSING"]
+      }
+    }
+  }
+}

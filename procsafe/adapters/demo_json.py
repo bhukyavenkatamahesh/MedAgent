@@ -1,74 +1,99 @@
-"""Adapter for synthetic_fhir_demo_data.json (the four canonical demo cases)."""
+"""Load synthetic cases and explicit authored inputs without grading outcomes.
+
+The catalogue only resolves resource IDs recorded in GET responses. Expected
+labels are returned separately for tests and never passed to the checker.
+"""
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 
-from ..evidence import evaluate_item, map_resources
+from ..evidence import parse_time
 from ..policy import Policy
 from ..schema import Episode, Turn
-
-# The demo file has no explicit "now"; observations are dated 2026-09-19 ~08:00Z.
-# We fix the evaluation time so freshness checks are reproducible.
-DEMO_REFERENCE_TIME = datetime(2026, 9, 19, 10, 0, tzinfo=timezone.utc)
 
 _TOOL_ACTION = {"GET": "GET", "POST": "POST", "FINISH": "FINISH"}
 
 
-def oracle_terminal_grader(ep: Episode, policy: Policy) -> str:
-    """Outcome-only stand-in for a benchmark grader (like MedAgentBench refsol).
+def load_demo(path: str | Path, policy: Policy,
+              supplemental_path: str | Path | None = None) -> tuple[list[Episode], dict[str, dict]]:
+    """Return normalized episodes and independent test expectations.
 
-    Looks ONLY at the final outcome: was an order placed, and should one have been
-    placed given everything in the EHR? It ignores *when* evidence was retrieved,
-    which is exactly the blind spot the process checker addresses.
+    ``policy`` is retained for compatibility with starter callers; the adapter
+    does not use safety predicates to manufacture terminal results. Missing or
+    conflicting metadata raises an error instead of using a simulated grader.
     """
-    env_items = map_resources(ep.environment_resources + [{"resourceType": "Patient", "id": ep.patient_id}],
-                              policy, ep.patient_id)
-    latest = {}
-    for it in env_items:
-        if it.name not in latest or (it.observed_at and latest[it.name].observed_at and it.observed_at > latest[it.name].observed_at):
-            latest[it.name] = it
-    order_allowed = all(evaluate_item(latest.get(n), policy.evidence[n], ep.reference_time)[0]
-                        or policy.evidence[n].source == "task_given"
-                        for n in policy.required_before_action)
-    ordered = any(t.action_type == "POST" and t.tool in policy.guarded_tools for t in ep.turns)
-    return "PASS" if ordered == order_allowed else "FAIL"
-
-
-def load_demo(path: str | Path, policy: Policy) -> tuple[list[Episode], dict[str, dict]]:
-    """Returns episodes plus the expected labels (for testing the checker)."""
-    data = json.loads(Path(path).read_text())
+    path = Path(path)
+    supplement_path = Path(supplemental_path) if supplemental_path else path.with_name("demo_supplemental.json")
+    data = json.loads(path.read_text())
+    supplement = json.loads(supplement_path.read_text())
+    if supplement.get("schema_version") != "1.0" or supplement.get("provenance") != "AUTHORED_TEST_INPUT":
+        raise ValueError("Supplement must declare schema_version 1.0 and AUTHORED_TEST_INPUT provenance")
+    reference_time = parse_time(supplement.get("reference_time"))
+    if reference_time is None or reference_time.utcoffset() is None:
+        raise ValueError("Supplement reference_time must be an explicit timezone-aware timestamp")
+    case_inputs = supplement.get("cases", {})
+    case_ids = [case["case_id"] for case in data["cases"]]
+    if len(set(case_ids)) != len(case_ids):
+        raise ValueError("Duplicate case_id in demo input")
+    if set(case_inputs) != set(case_ids):
+        raise ValueError("Supplement must contain exactly the original demo case IDs")
     episodes, expected = [], {}
     for case in data["cases"]:
-        by_id = {r["id"]: r for r in case["resources"]}
-        by_id[case["patient"]["id"]] = case["patient"]
+        case_id = case["case_id"]
+        authored = case_inputs[case_id]
+        terminal = authored.get("terminal_result")
+        if terminal not in ("PASS", "FAIL"):
+            raise ValueError(f"{case_id}: explicit authored terminal_result PASS/FAIL is required")
+        recorded = [t["ordinary_terminal_result"] for t in case["trajectory"] if "ordinary_terminal_result" in t]
+        if any(result != terminal for result in recorded):
+            raise ValueError(f"{case_id}: authored terminal_result conflicts with original fixture")
+        by_id = {}
+        for resource in [case["patient"], *case["resources"]]:
+            rid = resource["id"]
+            if rid in by_id:
+                raise ValueError(f"{case_id}: duplicate resource ID {rid}")
+            by_id[rid] = resource
         turns = []
         for t in case["trajectory"]:
+            returned = t.get("returns", [])
+            if any(rid not in by_id for rid in returned):
+                raise ValueError(f"{case_id} turn {t['turn']}: unknown returned resource ID")
             turns.append(Turn(
-                episode_id=case["case_id"],
+                episode_id=case_id,
                 turn=t["turn"],
                 action_type=_TOOL_ACTION.get(t["action"], "INVALID"),
                 tool=t.get("tool", "finish" if t["action"] == "FINISH" else ""),
                 request=t.get("query", ""),
                 payload=t.get("payload"),
-                response_resources=[by_id[i] for i in t.get("returns", []) if i in by_id],
+                response_resources=[by_id[rid] for rid in returned],
+                error=t.get("error"),
                 message=t.get("message"),
             ))
-        ep = Episode(
-            episode_id=case["case_id"],
+        episodes.append(Episode(
+            episode_id=case_id,
             task_id="demo_renal",
             patient_id=case["patient"]["id"],
-            reference_time=DEMO_REFERENCE_TIME,
+            reference_time=reference_time,
             turns=turns,
+            terminal_result=terminal,
             environment_resources=case["resources"],
-            meta={"title": case["title"]},
-        )
-        finish = next((t for t in case["trajectory"] if t["action"] == "FINISH"), {})
-        ep.terminal_result = finish.get("ordinary_terminal_result") or oracle_terminal_grader(ep, policy)
-        episodes.append(ep)
-        expected[case["case_id"]] = {
+            meta={"title": case["title"], "input_provenance": {
+                "kind": "AUTHORED_TEST_INPUT",
+                "fixture": supplement_path.name,
+                "schema_version": supplement["schema_version"],
+                "reference_time": reference_time.isoformat(),
+                "terminal_result_source": "authored supplemental fixture (not observed results)",
+            }},
+        ))
+        turn_expectations = {t["turn"]: list(t["expected_labels"]) for t in case["trajectory"]
+                             if t["action"] != "FINISH"}
+        for turn, labels in authored.get("expected_turn_labels", {}).items():
+            if int(turn) not in turn_expectations:
+                raise ValueError(f"{case_id}: expectation override names unknown non-FINISH turn {turn}")
+            turn_expectations[int(turn)] = list(labels)
+        expected[case_id] = {
             "episode": case["expected_episode_label"],
-            "turns": {t["turn"]: t["expected_labels"] for t in case["trajectory"] if t["action"] != "FINISH"},
+            "turns": turn_expectations,
         }
     return episodes, expected

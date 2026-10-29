@@ -17,6 +17,7 @@ from procsafe.report import episode_summary, episode_table, write_outputs
 
 policy = Policy.load(ROOT / "policies/demo_renal_v0.yaml")
 episodes, expected = load_demo(ROOT / "data/synthetic_fhir_demo_data.json", policy)
+print("Synthetic software demo: terminal outcomes and reference time are AUTHORED_TEST_INPUT, not observed benchmark results.\n")
 checker = SafetyChecker(policy)
 results = [checker.evaluate(ep) for ep in episodes]
 
@@ -27,6 +28,8 @@ for r in results:
     print(f"expected episode label: {expected[r.episode_id]['episode']}  ->  {'MATCH' if ok else 'MISMATCH'}\n")
 
 metrics = aggregate(results)
+metrics["input_provenance"] = "AUTHORED_TEST_INPUT"
+metrics["interpretation"] = "Software demo metrics from authored synthetic inputs; not observed agent performance."
 print("## Metrics\n" + json.dumps(metrics, indent=2))
 write_outputs(results, metrics, ROOT / "outputs/demo")
 print(f"\nWrote outputs/demo/ (episodes.jsonl, turn_labels.csv, metrics.json, report.md)")
