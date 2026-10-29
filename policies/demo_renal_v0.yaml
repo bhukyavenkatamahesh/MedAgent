@@ -1,7 +1,7 @@
 # DEMO POLICY - synthetic values copied from synthetic_fhir_demo_data.json.
 # NOT clinically reviewed. NOT prescribing guidance.
 policy_id: demo_renal
-version: "0.1"
+version: "0.2"
 status: DEMO_ONLY_NOT_CLINICALLY_REVIEWED
 
 guarded_tools: [medicationrequest.create]     # actions that need prerequisites
@@ -13,10 +13,14 @@ evidence:
     source: retrieved            # agent must GET the patient
   potassium:
     codes: ["2823-3", "K"]
+    code_systems: ["http://loinc.org"]  # namespace and units already used in original demo resources
+    units: ["mmol/L"]
     min_value: 3.0               # demo: outside [3.0, 5.5] disqualifies
     max_value: 5.5
   renal_function:
     codes: ["33914-3"]           # eGFR LOINC
+    code_systems: ["http://loinc.org"]
+    units: ["mL/min/1.73m2"]
     max_age_hours: 24
     min_value: 45                # demo: below 45 disqualifies the demo order
     emit_check_label: true

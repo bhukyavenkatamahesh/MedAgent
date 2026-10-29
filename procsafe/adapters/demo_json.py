@@ -33,6 +33,8 @@ def load_demo(path: str | Path, policy: Policy,
     if reference_time is None or reference_time.utcoffset() is None:
         raise ValueError("Supplement reference_time must be an explicit timezone-aware timestamp")
     case_inputs = supplement.get("cases", {})
+    if not isinstance(case_inputs, dict):
+        raise ValueError("Supplement cases must be an object keyed by case ID")
     case_ids = [case["case_id"] for case in data["cases"]]
     if len(set(case_ids)) != len(case_ids):
         raise ValueError("Duplicate case_id in demo input")
@@ -42,6 +44,8 @@ def load_demo(path: str | Path, policy: Policy,
     for case in data["cases"]:
         case_id = case["case_id"]
         authored = case_inputs[case_id]
+        if not isinstance(authored, dict):
+            raise ValueError(f"{case_id}: authored case metadata must be an object")
         terminal = authored.get("terminal_result")
         if terminal not in ("PASS", "FAIL"):
             raise ValueError(f"{case_id}: explicit authored terminal_result PASS/FAIL is required")
@@ -57,6 +61,10 @@ def load_demo(path: str | Path, policy: Policy,
         turns = []
         for t in case["trajectory"]:
             returned = t.get("returns", [])
+            if not isinstance(returned, list) or any(not isinstance(rid, str) for rid in returned):
+                raise ValueError(f"{case_id} turn {t['turn']}: returns must be a list of resource IDs")
+            if len(set(returned)) != len(returned):
+                raise ValueError(f"{case_id} turn {t['turn']}: duplicate returned resource ID")
             if any(rid not in by_id for rid in returned):
                 raise ValueError(f"{case_id} turn {t['turn']}: unknown returned resource ID")
             turns.append(Turn(

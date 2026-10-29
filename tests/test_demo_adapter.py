@@ -94,3 +94,28 @@ def test_report_retains_authored_input_attribution(tmp_path, policy):
     assert saved["input_provenance"]["kind"] == "AUTHORED_TEST_INPUT"
     assert "not observed benchmark results" in (tmp_path / "report.md").read_text()
     assert "AUTHORED_TEST_INPUT" in (tmp_path / "turn_labels.csv").read_text()
+
+
+@pytest.mark.parametrize("returned", [None, "obs-demo-pot-001", [None],
+                                      ["unknown-id"], ["obs-demo-pot-001", "obs-demo-pot-001"]])
+def test_malformed_or_unresolvable_return_ids_rejected(tmp_path, policy, returned):
+    data = json.loads(DATA.read_text())
+    data["cases"][0]["trajectory"][1]["returns"] = returned
+    path = tmp_path / "demo.json"
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="resource ID"):
+        load_demo(path, policy, SUPPLEMENT)
+
+
+@pytest.mark.parametrize("duplicate", ["case", "resource"])
+def test_duplicate_demo_identity_rejected(tmp_path, policy, duplicate):
+    data = json.loads(DATA.read_text())
+    if duplicate == "case":
+        data["cases"].append(data["cases"][0])
+    else:
+        resources = data["cases"][0]["resources"]
+        resources.append(resources[0])
+    path = tmp_path / "demo.json"
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="[Dd]uplicate"):
+        load_demo(path, policy, SUPPLEMENT)
