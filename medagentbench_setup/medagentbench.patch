@@ -1,0 +1,61 @@
+diff --git a/configs/agents/api_agents.yaml b/configs/agents/api_agents.yaml
+index 7df2d6e..3ad34fd 100644
+--- a/configs/agents/api_agents.yaml
++++ b/configs/agents/api_agents.yaml
+@@ -75,4 +75,13 @@ mistral:
+ claude3.5:
+     import: "./claude-chat.yaml"
+     parameters:
+-        name: "claude3.5"
+\ No newline at end of file
++        name: "claude3.5"
++
++
++
++qwen2.5-local:
++    import: "./ollama-chat.yaml"
++    parameters:
++        name: "qwen2.5-local"
++        body:
++            model: "qwen2.5:7b-instruct"
+\ No newline at end of file
+diff --git a/configs/assignments/default.yaml b/configs/assignments/default.yaml
+index ebeae42..de939cd 100644
+--- a/configs/assignments/default.yaml
++++ b/configs/assignments/default.yaml
+@@ -4,20 +4,11 @@ concurrency:
+   task:
+     medagentbench-std: 20
+   agent:
+-    gpt-4o-mini: 10
+-    gpt-4o: 10
+-    o1-mini: 10
+-    gemini-2.0: 1
+-    llama-3.3: 1
+-    deepseekv3: 1
+-    qwen2.5: 5
+-    gemma2: 5
+-    mistral: 5
+-    claude3.5: 1
++    qwen2.5-local: 1
+ 
+ assignments: # List[Assignment] | Assignment
+   - agent: # "task": List[str] | str ,  "agent": List[str] | str
+-      - gpt-4o-mini
++      - qwen2.5-local
+ #      - gemini-2.0
+ #      - llama-3.3
+ #      - gpt-4o
+diff --git a/src/server/tasks/medagentbench/__init__.py b/src/server/tasks/medagentbench/__init__.py
+index 3bd2312..c1a80db 100644
+--- a/src/server/tasks/medagentbench/__init__.py
++++ b/src/server/tasks/medagentbench/__init__.py
+@@ -52,7 +52,7 @@ class MedAgentBench(Task):
+             exit()
+ 
+     def get_indices(self) -> List[Any]:
+-        return list(range(len(self.data))) #[20]#[10*i for i in range(10)]
++        return [i for i, task in enumerate(self.data) if task['id'].startswith('task9')][:5]
+ 
+     async def start_sample(self, index, session: Session):
+         print(f"task start {index}")
