@@ -224,7 +224,7 @@ def load_runs(runs_jsonl: str | Path, tasks_json: str | Path,
             reference_time=now,
             turns=parse_history(out.get("history") or [], episode_id, lenient),
             terminal_result=terminal,
-            meta={"status": status, "instruction": task["instruction"]},
+            meta={"status": status, "instruction": task["instruction"], "context": task.get("context", "")},
         ))
     return episodes
 

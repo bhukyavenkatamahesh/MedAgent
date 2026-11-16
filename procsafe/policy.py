@@ -36,6 +36,10 @@ class Policy:
     required_before_action: list[str]  # names of EvidenceRule that must be satisfied before a guarded action
     evidence: dict[str, EvidenceRule]
     defer_keywords: list[str] = field(default_factory=list)
+    # Writes (POSTs) that are expected but not guarded, e.g. task9's follow-up lab ServiceRequest.
+    # None (key absent) = legacy v0 behaviour: every unguarded POST is OTHER_ACTION.
+    # A list (even empty) = every POST that is neither guarded nor listed here is an UNEXPECTED_WRITE.
+    allowed_writes: Optional[list[str]] = None
 
     @classmethod
     def load(cls, path: str | Path) -> "Policy":
@@ -52,6 +56,7 @@ class Policy:
             required_before_action=raw["required_before_action"],
             evidence=ev,
             defer_keywords=[k.lower() for k in raw.get("defer_keywords", [])],
+            allowed_writes=raw.get("allowed_writes"),
         )
 
     def rule_for_code(self, code: str) -> Optional[EvidenceRule]:

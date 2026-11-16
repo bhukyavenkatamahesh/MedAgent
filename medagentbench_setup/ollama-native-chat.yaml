@@ -1,0 +1,19 @@
+# Local Ollama through its native chat API, so the context window can be set explicitly.
+# (The OpenAI-compatible endpoint ignores num_ctx and stays at Ollama's 4096-token default,
+#  which the benchmark prompt + one GET response overflows.)
+module: src.client.agents.HTTPAgent
+parameters:
+  url: http://localhost:11434/api/chat
+  headers:
+    Content-Type: application/json
+  body:
+    stream: false
+    options:
+      temperature: 0
+      num_ctx: 8192
+      num_predict: 2048
+  prompter:
+    name: role_content_dict
+    args:
+      agent_role: assistant
+  return_format: "{response[message][content]}"

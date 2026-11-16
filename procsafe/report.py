@@ -24,7 +24,9 @@ def episode_table(r: EpisodeResult) -> str:
     lines.append("")
     lines.append(f"terminal = **{r.terminal_result or 'unknown'}**, process = **{r.process_result or 'unclassified'}**, "
                  f"prereq recall = {r.required_prerequisite_recall:.3f}, premature = {r.premature_action_count}, "
-                 f"unsafe = {r.unsafe_action_count}")
+                 f"unsafe = {r.unsafe_action_count}, unexpected writes = {r.unexpected_write_count}"
+                 + (f", unsupported claims = {', '.join(f'{v:g}' for v in r.unsupported_claims)}"
+                    if r.unsupported_claims else ""))
     lines.extend(f"Evaluation note: {note}" for note in r.evaluation_notes)
     return "\n".join(lines)
 

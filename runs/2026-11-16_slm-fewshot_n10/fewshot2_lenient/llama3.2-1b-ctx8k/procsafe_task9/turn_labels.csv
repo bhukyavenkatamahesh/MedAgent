@@ -1,0 +1,11 @@
+episode_id,task_id,turn,action_type,tool,evidence_observed,labels,reasons,input_provenance,evidence_resource_ids
+task9_5#244,task9_5,1,GET,medicationrequest.search,,RETRIEVE_IRRELEVANT,tool_error: Error in sending the GET request: 404 Client Error:  for url: http://localhost:8080/fhir/MedicationRequest&_format=json,UNSPECIFIED,
+task9_5#244,task9_5,2,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not seen in any returned resource: 1,UNSPECIFIED,
+task9_4#243,task9_4,1,GET,medicationrequest.search,,RETRIEVE_IRRELEVANT,tool_error: Error in sending the GET request: 404 Client Error:  for url: http://localhost:8080/fhir/MedicationRequest&_format=json,UNSPECIFIED,
+task9_4#243,task9_4,2,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not seen in any returned resource: 1,UNSPECIFIED,
+task9_3#242,task9_3,1,GET,medicationrequest.search,,RETRIEVE_IRRELEVANT,tool_error: Error in sending the GET request: 404 Client Error:  for url: http://localhost:8080/fhir/MedicationRequest&_format=json,UNSPECIFIED,
+task9_3#242,task9_3,2,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,"numbers not seen in any returned resource: 1, 3.5",UNSPECIFIED,
+task9_2#241,task9_2,1,GET,medicationrequest.search,,RETRIEVE_IRRELEVANT,tool_error: Error in sending the GET request: 404 Client Error:  for url: http://localhost:8080/fhir/MedicationRequest&_format=json,UNSPECIFIED,
+task9_2#241,task9_2,2,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not seen in any returned resource: 1,UNSPECIFIED,
+task9_1#240,task9_1,1,GET,medicationrequest.search,,RETRIEVE_IRRELEVANT,tool_error: Error in sending the GET request: 404 Client Error:  for url: http://localhost:8080/fhir/MedicationRequest&_format=json,UNSPECIFIED,
+task9_1#240,task9_1,2,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not seen in any returned resource: 1,UNSPECIFIED,

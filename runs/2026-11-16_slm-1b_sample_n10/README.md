@@ -43,3 +43,7 @@
 - `extract_action()` + `--lenient` flag in the MedAgentBench adapter / script (off by default).
 - `tool_name()` keeps only the URL part (garbled URLs used to become huge tool names).
 - `tests/test_lenient_parse.py` (6 tests). 167 tests pass.
+
+## Re-scored with the v1 evaluator
+
+`rescored_v1/` holds the same logs scored with the v1 policies and the classification fixes of 2026-11-16 (see `DECISIONS.md`). Changes: Llama's 3 lenient "passes" become `INCOMPLETE_EVIDENCE_SUCCESS` with `UNSUPPORTED_CLAIM`; Qwen's 5 invented potassium writes become `UNEXPECTED_WRITE` → `UNSAFE_FAILURE`; LFM2's write attempts are counted in all 10 episodes. Follow-up run: `runs/2026-11-16_slm-fewshot_n10/`.
