@@ -33,6 +33,7 @@ _NOW_RE = re.compile(r"It's (\S+) now")
 
 def tool_name(method: str, url: str) -> str:
     """Map a FHIR URL to the MedAgentBench function name."""
+    url = (url.split() or [""])[0]  # small models append prose/JSON after the URL; keep the URL only
     path = urlparse(url).path.rstrip("/").split("/")[-1]
     params = parse_qs(urlparse(url).query)
     if path == "Observation":
@@ -114,7 +115,39 @@ def _clean(content: str) -> str:
     return content.strip().replace("```tool_code", "").replace("```", "").strip()
 
 
-def parse_history(history: list[dict], episode_id: str) -> list[Turn]:
+def extract_action(content: str) -> str:
+    """Lenient parse: pull the first action out of a reply that wraps it in prose.
+
+    Small models often answer "I will call GET ...\\nGET http://...\\nThe response will be JSON."
+    The benchmark's strict parser rejects that. This returns the first line that starts with
+    GET / POST / FINISH( (plus the JSON body for POST, or up to the closing ")" for FINISH).
+    If no such line exists, the cleaned text is returned unchanged (so it stays INVALID).
+    MedAgentBench's LENIENT_PARSE mode uses an identical copy of this function, so the
+    environment and the checker always agree on which action was taken.
+    """
+    text = _clean(content)
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if s.startswith("GET "):
+            return s
+        if s.startswith("POST "):
+            rest = "\n".join(lines[i + 1:])
+            start = rest.find("{")
+            if start >= 0:
+                try:
+                    obj, _ = json.JSONDecoder().raw_decode(rest[start:])
+                    return s + "\n" + json.dumps(obj)
+                except ValueError:
+                    pass
+            return s + ("\n" + rest if rest else "")
+        if s.startswith("FINISH("):
+            rest = "\n".join(lines[i:])
+            return rest[: rest.rfind(")") + 1]
+    return text
+
+
+def parse_history(history: list[dict], episode_id: str, lenient: bool = False) -> list[Turn]:
     if not isinstance(history, list) or any(not isinstance(m, dict) or "role" not in m for m in history):
         raise ValueError("History must be a list of messages with explicit roles")
     turns: list[Turn] = []
@@ -126,7 +159,7 @@ def parse_history(history: list[dict], episode_id: str) -> list[Turn]:
         if not isinstance(msg.get("content"), str):
             turns.append(Turn(episode_id, n, INVALID, "invalid", error="invalid_action_text"))
             continue
-        r = _clean(msg["content"])
+        r = extract_action(msg["content"]) if lenient else _clean(msg["content"])
         nxt = history[i + 1].get("content", "") if i + 1 < len(history) and history[i + 1]["role"] == "user" else ""
         if r == GET or r.startswith("GET "):
             url = r[3:].strip()
@@ -155,7 +188,8 @@ def parse_history(history: list[dict], episode_id: str) -> list[Turn]:
 
 def load_runs(runs_jsonl: str | Path, tasks_json: str | Path,
               terminal_results: Optional[dict[int, str]] = None,
-              task_prefixes: tuple[str, ...] = ("task5", "task9")) -> list[Episode]:
+              task_prefixes: tuple[str, ...] = ("task5", "task9"),
+              lenient: bool = False) -> list[Episode]:
     """Load MedAgentBench runs for the selected task families."""
     tasks = json.loads(Path(tasks_json).read_text())
     episodes = []
@@ -188,7 +222,7 @@ def load_runs(runs_jsonl: str | Path, tasks_json: str | Path,
             task_id=task["id"],
             patient_id=task["eval_MRN"],
             reference_time=now,
-            turns=parse_history(out.get("history") or [], episode_id),
+            turns=parse_history(out.get("history") or [], episode_id, lenient),
             terminal_result=terminal,
             meta={"status": status, "instruction": task["instruction"]},
         ))

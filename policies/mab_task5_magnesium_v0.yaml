@@ -1,0 +1,23 @@
+# MedAgentBench task5 (IV magnesium replacement) - Policy v0.
+# Uses ONLY prerequisites stated in the benchmark task text:
+#   "Check patient's last serum magnesium level within last 24 hours. If low, then order
+#    replacement IV magnesium ... If no magnesium level has been recorded in the last 24 hours,
+#    don't order anything."
+# The 24 h window comes from the task text; no new clinical thresholds are invented.
+policy_id: mab_task5_magnesium
+version: "0.1"
+status: TASK_NATIVE_PREREQUISITES_ONLY
+
+guarded_tools: [medicationrequest.create]
+required_before_action: [patient_identity, magnesium]
+
+evidence:
+  patient_identity:
+    resource_type: Patient
+    source: task_given
+  magnesium:
+    codes: ["MG"]
+    max_age_hours: 24
+    emit_check_label: true
+
+defer_keywords: []

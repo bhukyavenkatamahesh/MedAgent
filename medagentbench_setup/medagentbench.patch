@@ -1,8 +1,8 @@
 diff --git a/configs/agents/api_agents.yaml b/configs/agents/api_agents.yaml
-index 7df2d6e..3ad34fd 100644
+index 7df2d6e..6e8129c 100644
 --- a/configs/agents/api_agents.yaml
 +++ b/configs/agents/api_agents.yaml
-@@ -75,4 +75,13 @@ mistral:
+@@ -75,4 +75,42 @@ mistral:
  claude3.5:
      import: "./claude-chat.yaml"
      parameters:
@@ -18,7 +18,35 @@ index 7df2d6e..3ad34fd 100644
 +        name: "qwen2.5-local"
 +        body:
 +            model: "qwen2.5:7b-instruct"
-\ No newline at end of file
++
++# ---- On-device SLMs (~1B), served by local Ollama ----
++llama3.2-1b-local:
++    import: "./ollama-chat.yaml"
++    parameters:
++        name: "llama3.2-1b-local"
++        body:
++            model: "llama3.2:1b"
++
++gemma3-1b-local:
++    import: "./ollama-chat.yaml"
++    parameters:
++        name: "gemma3-1b-local"
++        body:
++            model: "gemma3:1b"
++
++qwen2.5-1.5b-local:
++    import: "./ollama-chat.yaml"
++    parameters:
++        name: "qwen2.5-1.5b-local"
++        body:
++            model: "qwen2.5:1.5b-instruct"
++
++lfm2-1.2b-local:
++    import: "./ollama-chat.yaml"
++    parameters:
++        name: "lfm2-1.2b-local"
++        body:
++            model: "hf.co/LiquidAI/LFM2-1.2B-GGUF"
 diff --git a/configs/assignments/default.yaml b/configs/assignments/default.yaml
 index ebeae42..de939cd 100644
 --- a/configs/assignments/default.yaml
@@ -46,16 +74,237 @@ index ebeae42..de939cd 100644
  #      - gemini-2.0
  #      - llama-3.3
  #      - gpt-4o
+diff --git a/configs/assignments/slm_gemma3-1b-local.yaml b/configs/assignments/slm_gemma3-1b-local.yaml
+new file mode 100644
+index 0000000..35fe5dd
+--- /dev/null
++++ b/configs/assignments/slm_gemma3-1b-local.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    gemma3-1b-local: 1
++
++assignments:
++  - agent:
++      - gemma3-1b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample"
+diff --git a/configs/assignments/slm_gemma3-1b-local_lenient.yaml b/configs/assignments/slm_gemma3-1b-local_lenient.yaml
+new file mode 100644
+index 0000000..5914347
+--- /dev/null
++++ b/configs/assignments/slm_gemma3-1b-local_lenient.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    gemma3-1b-local: 1
++
++assignments:
++  - agent:
++      - gemma3-1b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample_lenient"
+diff --git a/configs/assignments/slm_lfm2-1.2b-local.yaml b/configs/assignments/slm_lfm2-1.2b-local.yaml
+new file mode 100644
+index 0000000..d0ed7ae
+--- /dev/null
++++ b/configs/assignments/slm_lfm2-1.2b-local.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    lfm2-1.2b-local: 1
++
++assignments:
++  - agent:
++      - lfm2-1.2b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample"
+diff --git a/configs/assignments/slm_lfm2-1.2b-local_lenient.yaml b/configs/assignments/slm_lfm2-1.2b-local_lenient.yaml
+new file mode 100644
+index 0000000..20e6b91
+--- /dev/null
++++ b/configs/assignments/slm_lfm2-1.2b-local_lenient.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    lfm2-1.2b-local: 1
++
++assignments:
++  - agent:
++      - lfm2-1.2b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample_lenient"
+diff --git a/configs/assignments/slm_llama3.2-1b-local.yaml b/configs/assignments/slm_llama3.2-1b-local.yaml
+new file mode 100644
+index 0000000..cf8f655
+--- /dev/null
++++ b/configs/assignments/slm_llama3.2-1b-local.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    llama3.2-1b-local: 1
++
++assignments:
++  - agent:
++      - llama3.2-1b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample"
+diff --git a/configs/assignments/slm_llama3.2-1b-local_lenient.yaml b/configs/assignments/slm_llama3.2-1b-local_lenient.yaml
+new file mode 100644
+index 0000000..93c3354
+--- /dev/null
++++ b/configs/assignments/slm_llama3.2-1b-local_lenient.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    llama3.2-1b-local: 1
++
++assignments:
++  - agent:
++      - llama3.2-1b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample_lenient"
+diff --git a/configs/assignments/slm_qwen2.5-1.5b-local.yaml b/configs/assignments/slm_qwen2.5-1.5b-local.yaml
+new file mode 100644
+index 0000000..218b254
+--- /dev/null
++++ b/configs/assignments/slm_qwen2.5-1.5b-local.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    qwen2.5-1.5b-local: 1
++
++assignments:
++  - agent:
++      - qwen2.5-1.5b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample"
+diff --git a/configs/assignments/slm_qwen2.5-1.5b-local_lenient.yaml b/configs/assignments/slm_qwen2.5-1.5b-local_lenient.yaml
+new file mode 100644
+index 0000000..1a98657
+--- /dev/null
++++ b/configs/assignments/slm_qwen2.5-1.5b-local_lenient.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 1
++  agent:
++    qwen2.5-1.5b-local: 1
++
++assignments:
++  - agent:
++      - qwen2.5-1.5b-local
++    task:
++      - medagentbench-std
++
++output: "outputs/SLM_sample_lenient"
 diff --git a/src/server/tasks/medagentbench/__init__.py b/src/server/tasks/medagentbench/__init__.py
-index 3bd2312..c1a80db 100644
+index 3bd2312..fc37b3d 100644
 --- a/src/server/tasks/medagentbench/__init__.py
 +++ b/src/server/tasks/medagentbench/__init__.py
-@@ -52,7 +52,7 @@ class MedAgentBench(Task):
+@@ -6,6 +6,7 @@ from .utils import *
+ from .eval import eval
+ import time
+ import json
++import os
+ import importlib
+ 
+ MedAgentBench_prompt = """You are an expert in using FHIR functions to assist medical professionals. You are given a question and a set of possible functions. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
+@@ -28,6 +29,32 @@ Here is a list of functions in JSON format that you can invoke. Note that you sh
+ Context: {context}
+ Question: {question}"""
+ 
++
++def extract_action(content: str) -> str:
++    """procsafe lenient parse (LENIENT_PARSE=1). Identical copy of
++    procsafe.adapters.medagentbench.extract_action: returns the first GET / POST / FINISH(
++    line from a reply that wraps the action in prose."""
++    text = content.strip().replace('```tool_code', '').replace('```', '').strip()
++    lines = text.split('\n')
++    for i, line in enumerate(lines):
++        s = line.strip()
++        if s.startswith('GET '):
++            return s
++        if s.startswith('POST '):
++            rest = '\n'.join(lines[i + 1:])
++            start = rest.find('{')
++            if start >= 0:
++                try:
++                    obj, _ = json.JSONDecoder().raw_decode(rest[start:])
++                    return s + '\n' + json.dumps(obj)
++                except ValueError:
++                    pass
++            return s + ('\n' + rest if rest else '')
++        if s.startswith('FINISH('):
++            rest = '\n'.join(lines[i:])
++            return rest[: rest.rfind(')') + 1]
++    return text
++
+ class MedAgentBench(Task):
+     def __init__(self, **configs):
+         super().__init__(**configs)
+@@ -52,7 +79,10 @@ class MedAgentBench(Task):
              exit()
  
      def get_indices(self) -> List[Any]:
 -        return list(range(len(self.data))) #[20]#[10*i for i in range(10)]
-+        return [i for i, task in enumerate(self.data) if task['id'].startswith('task9')][:5]
++        # procsafe SLM sample: first 5 task9 + first 5 task5 cases (SAMPLE_N env var overrides 5)
++        n = int(os.environ.get('SAMPLE_N', '5'))
++        return ([i for i, t in enumerate(self.data) if t['id'].startswith('task9')][:n]
++                + [i for i, t in enumerate(self.data) if t['id'].startswith('task5')][:n])
  
      async def start_sample(self, index, session: Session):
          print(f"task start {index}")
+@@ -72,6 +102,8 @@ class MedAgentBench(Task):
+                     history=session.history
+                 )
+                 r = res.content.strip().replace('```tool_code', '').replace('```', '').strip() #Remove separator for Gemini2.0Flash
++                if os.environ.get('LENIENT_PARSE') == '1':
++                    r = extract_action(res.content)
+ 
+                 if r.startswith('GET'):
+                     url = r[3:].strip() + '&_format=json'

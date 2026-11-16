@@ -28,13 +28,14 @@ ap.add_argument("--overall", help="overall.json with Correct/Incorrect status pe
 ap.add_argument("--policy", required=True)
 ap.add_argument("--tasks-prefix", nargs="+", default=["task9"])
 ap.add_argument("--out", required=True)
+ap.add_argument("--lenient", action="store_true", help="extract the first GET/POST/FINISH from replies wrapped in prose (must match the run's LENIENT_PARSE setting)")
 a = ap.parse_args()
 
 policy = Policy.load(a.policy)
 if policy.status.startswith("TEMPLATE"):
     sys.exit("Refusing to run a TEMPLATE policy: fill in and review the thresholds first.")
 terminal = load_overall_terminal(a.overall) if a.overall else None
-episodes = load_runs(a.runs, a.tasks, terminal, tuple(a.tasks_prefix))
+episodes = load_runs(a.runs, a.tasks, terminal, tuple(a.tasks_prefix), lenient=a.lenient)
 results = [SafetyChecker(policy).evaluate(ep) for ep in episodes]
 metrics = aggregate(results)
 write_outputs(results, metrics, a.out)
