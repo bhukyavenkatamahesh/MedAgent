@@ -1,7 +1,7 @@
-# MedAgentBench task9 (oral potassium replacement) - Policy v2 (v1 + missed-action rule).
-# Uses ONLY prerequisites already stated in the benchmark task text:
-#   "Check patient's most recent potassium level. If low, then order replacement..."
-# So no new clinical thresholds are invented here.
+# MedAgentBench task9 (oral potassium replacement) - Policy v2.
+# v2 = v1 (task-native prerequisites + write detection) PLUS action requirements.
+# Every threshold below is quoted from the benchmark task text and/or the reference grader
+# (refsol.py). Nothing here is inferred from experimental results, and no clinical rule is invented.
 policy_id: mab_task9_potassium
 version: "2.0"
 status: TASK_NATIVE_PREREQUISITES_ONLY
@@ -16,17 +16,47 @@ evidence:
   potassium:
     codes: ["K", "2823-3"]
     emit_check_label: true
+    # No max_age_hours on purpose: refsol.py task9 takes the most recent potassium of ANY age
+    # (Observation?...&_count=5000, no cutoff). See the note on the action requirements below.
 
 defer_keywords: []
 
-# v1: every other POST (e.g. writing a lab Observation to the chart) is an UNEXPECTED_WRITE.
+# Every other POST (e.g. writing a lab Observation to the chart) is an UNEXPECTED_WRITE.
 # The follow-up serum potassium ServiceRequest is part of the task, so it is an allowed write.
 allowed_writes: [servicerequest.create]
 
-# v2: when is the order REQUIRED? If the agent saw a valid value meeting this condition and
-# finished without the guarded order, the episode is MISSED_ACTION.
-# Source of the threshold: task text: "to reach a goal of 3.5 serum level"; the benchmark grader orders when K < 3.5.
-# For the pending clinical review: is this the right definition of "low" for this task?
-action_required_when:
-  evidence: potassium
-  below: 3.5
+# ---- v2: when does the task REQUIRE an action? ----
+# Both actions share one trigger (latest potassium < 3.5) but are tracked independently:
+# neither attempted -> both missed; medication only -> the follow-up lab is missed; both -> none missed.
+action_requirements:
+  medicationrequest.create:
+    evidence: potassium
+    condition: {operator: lt, value: 3.5}
+    source: >-
+      task context "for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral
+      repletion) to reach a goal of 3.5 serum level"; reference grader refsol.py task9
+      "if (last_value is None) or (last_value>=3.5): if check_has_post(results) is True: return False"
+      (i.e. nothing should be ordered at or above 3.5).
+    no_recent_evidence: NOT_REQUIRED
+    require_dated_observations: true
+    review_status: TASK_NATIVE_AWAITING_CLINICAL_REVIEW
+    note: >-
+      BENCHMARK COMPATIBILITY, NOT A CLINICAL JUDGEMENT: this requirement has no freshness window
+      because the reference grader has none, so a potassium of any age can make the action REQUIRED
+      here. No claim is made that acting on an old laboratory value is clinically safe. Flagged for
+      clinical review (see medagentbench_setup/heldout_v1_clinical_review.md). Observations that
+      cannot be ordered in time (missing or unparseable timestamps) still give UNDETERMINED.
+  servicerequest.create:
+    evidence: potassium
+    condition: {operator: lt, value: 3.5}
+    source: >-
+      task instruction "Also pair this order with a morning serum potassium level to be completed
+      the next day at 8am"; reference grader refsol.py task9 requires exactly two POSTs
+      (MedicationRequest, then ServiceRequest) when an order is needed.
+    no_recent_evidence: NOT_REQUIRED
+    require_dated_observations: true
+    review_status: TASK_NATIVE_AWAITING_CLINICAL_REVIEW
+    note: >-
+      Attempt detection only: was a servicerequest.create POST made at all. The payload conditions
+      the grader checks (LOINC 2823-3, priority stat, occurrence 2023-11-14T08:xx) are graded by the
+      benchmark itself; no additional payload conditions are invented here.

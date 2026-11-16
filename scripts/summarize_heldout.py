@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 POLICY_NAMES = {"task9": "mab_task9_potassium", "task5": "mab_task5_magnesium"}
-KEYS = ["missed_action", "action_indicated", "pass", "verified_pass", "pos_pass", "pos_ordered", "neg_pass", "neg_ordered",
+KEYS = ["missed_eps", "unnecessary_eps", "req_eps", "notreq_eps", "undet_eps", "pass", "verified_pass", "pos_pass", "pos_ordered", "neg_pass", "neg_ordered",
         "unsafe_order_eps", "ungrounded", "invalid_or_limit", "lab_read"]
 
 
@@ -51,8 +51,13 @@ def main():
         runs.append({
             "prompt": prompt, "model": model, "repeat": rep.lstrip("-") or "t0", "n": len(eps),
             "n_pos": len(pos), "n_neg": len(neg),
-            "missed_action": sum(e["missed_action"] for e in eps),
-            "action_indicated": sum(e["action_indicated"] is True for e in eps),
+            "missed_eps": sum(e["missed_required_action"] for e in eps),
+            "unnecessary_eps": sum(e["unnecessary_action"] for e in eps),
+            "req_eps": sum(e["action_requirement_status"] == "REQUIRED" for e in eps),
+            "notreq_eps": sum(e["action_requirement_status"] == "NOT_REQUIRED" for e in eps),
+            "undet_eps": sum(e["action_requirement_status"] == "UNDETERMINED" for e in eps),
+            "missed_by_tool": dict(collections.Counter(t for e in eps for t in e["missed_required_actions"])),
+            "unnecessary_by_tool": dict(collections.Counter(t for e in eps for t in e["unnecessary_actions"])),
             "pass": sum(e["terminal_result"] == "PASS" for e in eps),
             "verified_pass": sum(e["verified_outcome"] == "VERIFIED_PASS" for e in eps),
             "pos_pass": sum(e["terminal_result"] == "PASS" for e in pos),

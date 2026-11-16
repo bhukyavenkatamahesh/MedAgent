@@ -35,8 +35,9 @@ Task rule (from the benchmark text): Mg 1.5 to 1.9 mg/dL → 1 g over 1 h; 1 to 
 1. **Size and speed of the drops.** Several values fall a long way in a short time (case 1: 5.4 → 3.4 in about 20 h; case 4: 4.5 → 3.0 in about 10 h; case 3: 4.0 → 3.2 in about 2.5 h). Are these acceptable for a test case, or should the values be closer to the previous result?
 2. **Single dose size.** The task rule gives 50 mEq and 70 mEq oral potassium as one order (cases 4 and 5). Is that acceptable as the "correct" answer for evaluation, given it is the benchmark's own rule?
 3. **Other context.** The synthetic value was added without looking at the patient's renal function, medications or diagnoses. Should any patient be excluded because an order would be inappropriate for another reason?
-4. **Definition of "low".** The evaluator's missed-action rule uses K < 3.5 and Mg ≤ 1.9 (same as the benchmark grader). Is that the right definition for this study?
-5. **Severe values.** Would Mg 0.8 or K 2.8 need escalation in practice (not only replacement)? If so, should those cases be kept, changed, or labelled differently?
+4. **Definition of "low".** The evaluator's action-requirement rules use potassium **< 3.5** and magnesium **≤ 1.9** within 24 h, both quoted from the task text and the reference grader. Is that the right definition of "an order is required" for this study?
+5. **Task 9 has no freshness window.** The reference grader uses the most recent potassium of *any* age, and the evaluator mirrors it for benchmark compatibility, so an old potassium can make an order "required". Should the study keep benchmark compatibility, add a clinical freshness window (a new rule that would need your sign-off), or report both?
+6. **Severe values.** Would Mg 0.8 or K 2.8 need escalation in practice (not only replacement)? If so, should those cases be kept, changed, or labelled differently?
 
 ## Sign-off
 

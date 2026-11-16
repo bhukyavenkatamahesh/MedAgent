@@ -27,6 +27,42 @@ class EvidenceRule:
     emit_check_label: bool = False     # emit CHECK_SATISFIED / CHECK_MISSING when this evidence is queried
 
 
+ACTION_STATUSES = ("REQUIRED", "NOT_REQUIRED", "UNDETERMINED", "NOT_CONFIGURED")
+OPERATORS = {"lt": "<", "lte": "<=", "gt": ">", "gte": ">="}
+
+
+@dataclass
+class ActionRequirement:
+    """When does the task REQUIRE a given action (tool)?
+
+    Kept separate from EvidenceRule.min_value / max_value: those say when the evidence
+    *permits* a guarded action, this says when the task *demands* one. Every rule must cite
+    its `source` (benchmark task text and/or reference grader) and its `review_status`,
+    both of which appear in the report.
+    """
+    tool: str
+    evidence: str
+    operator: str                      # lt | lte | gt | gte
+    value: float
+    source: str                        # citation for the condition; no uncited thresholds
+    review_status: str                 # e.g. TASK_NATIVE_AWAITING_CLINICAL_REVIEW
+    # Status when a successful query showed no evidence inside the task's window.
+    # NOT_REQUIRED only where the task text itself says not to act (task5/task9 both do).
+    no_recent_evidence: str = "UNDETERMINED"
+    # Require a usable timestamp on every matching observation: without one the "most recent"
+    # value is ambiguous, so the status is UNDETERMINED even when no freshness window applies.
+    require_dated_observations: bool = True
+    note: str = ""
+
+    @property
+    def condition_text(self) -> str:
+        return f"{self.evidence} {OPERATORS[self.operator]} {self.value:g}"
+
+    def triggered(self, value: float) -> bool:
+        return {"lt": value < self.value, "lte": value <= self.value,
+                "gt": value > self.value, "gte": value >= self.value}[self.operator]
+
+
 @dataclass
 class Policy:
     policy_id: str
@@ -40,10 +76,9 @@ class Policy:
     # None (key absent) = legacy v0 behaviour: every unguarded POST is OTHER_ACTION.
     # A list (even empty) = every POST that is neither guarded nor listed here is an UNEXPECTED_WRITE.
     allowed_writes: Optional[list[str]] = None
-    # When the guarded action is REQUIRED: {"evidence": <name>, "below": x} or {"evidence": <name>, "at_or_below": x}.
-    # If the agent saw a valid, fresh value meeting the condition and finished without the guarded
-    # action, the episode is MISSED_ACTION. None (key absent) = no missed-action judgement.
-    action_required_when: Optional[dict] = None
+    # Optional. tool -> ActionRequirement. None (key absent) = no action-requirement judgement
+    # at all (status NOT_CONFIGURED), which is the behaviour of every v0 / v1 policy.
+    action_requirements: Optional[dict[str, ActionRequirement]] = None
 
     @classmethod
     def load(cls, path: str | Path) -> "Policy":
@@ -52,10 +87,25 @@ class Policy:
         missing = [r for r in raw["required_before_action"] if r not in ev]
         if missing:
             raise ValueError(f"required_before_action names unknown evidence: {missing}")
-        req = raw.get("action_required_when")
-        if req is not None:
-            if req.get("evidence") not in ev or sum(k in req for k in ("below", "at_or_below")) != 1:
-                raise ValueError("action_required_when needs a known 'evidence' name and exactly one of 'below' / 'at_or_below'")
+        reqs = None
+        if raw.get("action_requirements") is not None:
+            reqs = {}
+            for tool, cfg in raw["action_requirements"].items():
+                cfg = dict(cfg)
+                cond = cfg.pop("condition", None)
+                if not isinstance(cond, dict) or cond.get("operator") not in OPERATORS:
+                    raise ValueError(f"action_requirements[{tool}]: condition needs operator in {sorted(OPERATORS)}")
+                if cfg.get("evidence") not in ev:
+                    raise ValueError(f"action_requirements[{tool}]: unknown evidence {cfg.get('evidence')!r}")
+                for key in ("source", "review_status"):
+                    if not str(cfg.get(key, "")).strip():
+                        raise ValueError(f"action_requirements[{tool}]: '{key}' is required so every "
+                                         "action condition stays traceable and reviewable")
+                if cfg.get("no_recent_evidence", "UNDETERMINED") not in ("NOT_REQUIRED", "UNDETERMINED"):
+                    raise ValueError(f"action_requirements[{tool}]: no_recent_evidence must be "
+                                     "NOT_REQUIRED or UNDETERMINED")
+                reqs[tool] = ActionRequirement(tool=tool, operator=cond["operator"],
+                                               value=float(cond["value"]), **cfg)
         return cls(
             policy_id=raw["policy_id"],
             version=str(raw["version"]),
@@ -65,7 +115,7 @@ class Policy:
             evidence=ev,
             defer_keywords=[k.lower() for k in raw.get("defer_keywords", [])],
             allowed_writes=raw.get("allowed_writes"),
-            action_required_when=req,
+            action_requirements=reqs,
         )
 
     def rule_for_code(self, code: str) -> Optional[EvidenceRule]:

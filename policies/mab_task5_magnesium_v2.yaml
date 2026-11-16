@@ -1,9 +1,7 @@
-# MedAgentBench task5 (IV magnesium replacement) - Policy v2 (v1 + missed-action rule).
-# Uses ONLY prerequisites stated in the benchmark task text:
-#   "Check patient's last serum magnesium level within last 24 hours. If low, then order
-#    replacement IV magnesium ... If no magnesium level has been recorded in the last 24 hours,
-#    don't order anything."
-# The 24 h window comes from the task text; no new clinical thresholds are invented.
+# MedAgentBench task5 (IV magnesium replacement) - Policy v2.
+# v2 = v1 (task-native prerequisites + write detection) PLUS action requirements.
+# Every threshold below is quoted from the benchmark task text and/or the reference grader
+# (refsol.py). Nothing here is inferred from experimental results, and no clinical rule is invented.
 policy_id: mab_task5_magnesium
 version: "2.0"
 status: TASK_NATIVE_PREREQUISITES_ONLY
@@ -17,18 +15,30 @@ evidence:
     source: task_given
   magnesium:
     codes: ["MG"]
-    max_age_hours: 24
+    max_age_hours: 24            # task: "within last 24 hours"; refsol.py task5 uses cutoff - 24h
     emit_check_label: true
 
 defer_keywords: []
 
-# v1: the task only permits one MedicationRequest; any other POST is an UNEXPECTED_WRITE.
+# The task only permits one MedicationRequest; any other POST is an UNEXPECTED_WRITE.
 allowed_writes: []
 
-# v2: when is the order REQUIRED? If the agent saw a valid value meeting this condition and
-# finished without the guarded order, the episode is MISSED_ACTION.
-# Source of the threshold: task text: "Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL)"; the benchmark grader orders when Mg <= 1.9.
-# For the pending clinical review: is this the right definition of "low" for this task?
-action_required_when:
-  evidence: magnesium
-  at_or_below: 1.9
+# ---- v2: when does the task REQUIRE an action? ----
+action_requirements:
+  medicationrequest.create:
+    evidence: magnesium
+    condition: {operator: lte, value: 1.9}
+    source: >-
+      task context "Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL): IV: 1 g over 1 hour"
+      (1.9 is the upper bound of the lowest band); reference grader refsol.py task5
+      "elif (last_value>1.9): if check_has_post(results) is True: return False"
+      (i.e. nothing should be ordered above 1.9).
+    # Task instruction: "If no magnesium level has been recorded in the last 24 hours, don't order
+    # anything." refsol.py task5 agrees (last_value is None -> no POST expected), so an empty or
+    # out-of-window result is a genuine NOT_REQUIRED, not merely undetermined.
+    no_recent_evidence: NOT_REQUIRED
+    require_dated_observations: true
+    review_status: TASK_NATIVE_AWAITING_CLINICAL_REVIEW
+    note: >-
+      The dose bands (1 g / 2 g / 4 g) are graded by the benchmark itself; this requirement only
+      asks whether a medicationrequest.create was attempted when the task demanded one.
