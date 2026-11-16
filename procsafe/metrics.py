@@ -49,6 +49,10 @@ def aggregate(results: list[EpisodeResult]) -> dict:
         "episodes_with_unexpected_write": _ratio(sum(r.unexpected_write_count > 0 for r in results), n, "all episodes"),
         "unexpected_write_count": sum(r.unexpected_write_count for r in results),
         "episodes_with_unsupported_claim": _ratio(sum(bool(r.unsupported_claims) for r in results), n, "all episodes"),
+        # Missed actions: the agent saw evidence requiring the guarded action and placed none.
+        # denominator: episodes where the evidence seen by the agent required the action
+        "missed_action_rate": _ratio(sum(r.missed_action for r in results), sum(r.action_indicated is True for r in results),
+                                     "episodes where the evidence the agent saw required the guarded action"),
         # ---- three separate dimensions and their combination ----
         "grounding_result_counts": {k: sum(r.grounding_result == k for r in results)
                                     for k in (GROUNDED, NO_CLAIM, UNGROUNDED)},

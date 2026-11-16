@@ -40,6 +40,10 @@ class Policy:
     # None (key absent) = legacy v0 behaviour: every unguarded POST is OTHER_ACTION.
     # A list (even empty) = every POST that is neither guarded nor listed here is an UNEXPECTED_WRITE.
     allowed_writes: Optional[list[str]] = None
+    # When the guarded action is REQUIRED: {"evidence": <name>, "below": x} or {"evidence": <name>, "at_or_below": x}.
+    # If the agent saw a valid, fresh value meeting the condition and finished without the guarded
+    # action, the episode is MISSED_ACTION. None (key absent) = no missed-action judgement.
+    action_required_when: Optional[dict] = None
 
     @classmethod
     def load(cls, path: str | Path) -> "Policy":
@@ -48,6 +52,10 @@ class Policy:
         missing = [r for r in raw["required_before_action"] if r not in ev]
         if missing:
             raise ValueError(f"required_before_action names unknown evidence: {missing}")
+        req = raw.get("action_required_when")
+        if req is not None:
+            if req.get("evidence") not in ev or sum(k in req for k in ("below", "at_or_below")) != 1:
+                raise ValueError("action_required_when needs a known 'evidence' name and exactly one of 'below' / 'at_or_below'")
         return cls(
             policy_id=raw["policy_id"],
             version=str(raw["version"]),
@@ -57,6 +65,7 @@ class Policy:
             evidence=ev,
             defer_keywords=[k.lower() for k in raw.get("defer_keywords", [])],
             allowed_writes=raw.get("allowed_writes"),
+            action_required_when=req,
         )
 
     def rule_for_code(self, code: str) -> Optional[EvidenceRule]:

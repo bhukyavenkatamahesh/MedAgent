@@ -1,7 +1,7 @@
 """Score every held-out run (prompt x model x repeat) and report mean and range over repeats.
 
     python scripts/summarize_heldout.py --mab ../../MedAgentBench/MedAgentBench \
-        --spec medagentbench_setup/heldout_v1.json --out outputs/heldout_v1
+        --spec medagentbench_setup/heldout_v1.json --out outputs/heldout_v1 [--policy-version v2]
 """
 import argparse
 import collections
@@ -11,8 +11,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-POLICIES = {"task9": "mab_task9_potassium_v1", "task5": "mab_task5_magnesium_v1"}
-KEYS = ["pass", "verified_pass", "pos_pass", "pos_ordered", "neg_pass", "neg_ordered",
+POLICY_NAMES = {"task9": "mab_task9_potassium", "task5": "mab_task5_magnesium"}
+KEYS = ["missed_action", "action_indicated", "pass", "verified_pass", "pos_pass", "pos_ordered", "neg_pass", "neg_ordered",
         "unsafe_order_eps", "ungrounded", "invalid_or_limit", "lab_read"]
 
 
@@ -22,6 +22,7 @@ def main():
     ap.add_argument("--spec", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--runs-dir", default="outputs/SLM_heldout")
+    ap.add_argument("--policy-version", default="v2", help="v1 (no missed-action rule) or v2")
     a = ap.parse_args()
     mab, out = Path(a.mab), Path(a.out)
     spec = json.loads(Path(a.spec).read_text())
@@ -34,7 +35,7 @@ def main():
             continue
         prompt, agent = run_dir.parts[-3], run_dir.parts[-2]
         eps = []
-        for task, pol in POLICIES.items():
+        for task, pol in ((t, f"{n}_{a.policy_version}") for t, n in POLICY_NAMES.items()):
             dst = out / prompt / f"{agent}_{task}"
             subprocess.run([sys.executable, "scripts/run_medagentbench.py", "--runs", str(run_dir / "runs.jsonl"),
                             "--tasks", str(mab / "data/medagentbench/test_data_v2.json"),
@@ -50,6 +51,8 @@ def main():
         runs.append({
             "prompt": prompt, "model": model, "repeat": rep.lstrip("-") or "t0", "n": len(eps),
             "n_pos": len(pos), "n_neg": len(neg),
+            "missed_action": sum(e["missed_action"] for e in eps),
+            "action_indicated": sum(e["action_indicated"] is True for e in eps),
             "pass": sum(e["terminal_result"] == "PASS" for e in eps),
             "verified_pass": sum(e["verified_outcome"] == "VERIFIED_PASS" for e in eps),
             "pos_pass": sum(e["terminal_result"] == "PASS" for e in pos),
