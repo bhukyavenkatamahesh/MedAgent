@@ -1,8 +1,8 @@
 diff --git a/configs/agents/api_agents.yaml b/configs/agents/api_agents.yaml
-index 7df2d6e..f3837d2 100644
+index 7df2d6e..26ad1f8 100644
 --- a/configs/agents/api_agents.yaml
 +++ b/configs/agents/api_agents.yaml
-@@ -75,4 +75,58 @@ mistral:
+@@ -75,4 +75,120 @@ mistral:
  claude3.5:
      import: "./claude-chat.yaml"
      parameters:
@@ -63,6 +63,68 @@ index 7df2d6e..f3837d2 100644
 +        name: "qwen2.5-1.5b-ctx8k"
 +        body:
 +            model: "qwen2.5:1.5b-instruct"
++
++# ---- Sampled repeats: temperature 0.7 with a fixed seed per repeat ----
++llama3.2-1b-ctx8k-t07-s1:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "llama3.2-1b-ctx8k-t07-s1"
++        body:
++            model: "llama3.2:1b"
++            options:
++                temperature: 0.7
++                seed: 1
++
++llama3.2-1b-ctx8k-t07-s2:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "llama3.2-1b-ctx8k-t07-s2"
++        body:
++            model: "llama3.2:1b"
++            options:
++                temperature: 0.7
++                seed: 2
++
++llama3.2-1b-ctx8k-t07-s3:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "llama3.2-1b-ctx8k-t07-s3"
++        body:
++            model: "llama3.2:1b"
++            options:
++                temperature: 0.7
++                seed: 3
++
++qwen2.5-1.5b-ctx8k-t07-s1:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "qwen2.5-1.5b-ctx8k-t07-s1"
++        body:
++            model: "qwen2.5:1.5b-instruct"
++            options:
++                temperature: 0.7
++                seed: 1
++
++qwen2.5-1.5b-ctx8k-t07-s2:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "qwen2.5-1.5b-ctx8k-t07-s2"
++        body:
++            model: "qwen2.5:1.5b-instruct"
++            options:
++                temperature: 0.7
++                seed: 2
++
++qwen2.5-1.5b-ctx8k-t07-s3:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "qwen2.5-1.5b-ctx8k-t07-s3"
++        body:
++            model: "qwen2.5:1.5b-instruct"
++            options:
++                temperature: 0.7
++                seed: 3
++
 diff --git a/configs/assignments/default.yaml b/configs/assignments/default.yaml
 index ebeae42..de939cd 100644
 --- a/configs/assignments/default.yaml
@@ -259,7 +321,7 @@ index 0000000..1a98657
 +
 +output: "outputs/SLM_sample_lenient"
 diff --git a/src/server/tasks/medagentbench/__init__.py b/src/server/tasks/medagentbench/__init__.py
-index 3bd2312..d57dd9f 100644
+index 3bd2312..c6f3873 100644
 --- a/src/server/tasks/medagentbench/__init__.py
 +++ b/src/server/tasks/medagentbench/__init__.py
 @@ -6,6 +6,7 @@ from .utils import *
@@ -473,12 +535,15 @@ index 3bd2312..d57dd9f 100644
  class MedAgentBench(Task):
      def __init__(self, **configs):
          super().__init__(**configs)
-@@ -52,12 +245,17 @@ class MedAgentBench(Task):
+@@ -52,12 +245,20 @@ class MedAgentBench(Task):
              exit()
  
      def get_indices(self) -> List[Any]:
 -        return list(range(len(self.data))) #[20]#[10*i for i in range(10)]
 +        # procsafe SLM sample: first 5 task9 + first 5 task5 cases (SAMPLE_N env var overrides 5)
++        # CASE_INDICES="125,127,..." selects explicit cases (e.g. a held-out set) and overrides SAMPLE_N.
++        if os.environ.get('CASE_INDICES'):
++            return [int(i) for i in os.environ['CASE_INDICES'].split(',')]
 +        n = int(os.environ.get('SAMPLE_N', '5'))
 +        return ([i for i, t in enumerate(self.data) if t['id'].startswith('task9')][:n]
 +                + [i for i, t in enumerate(self.data) if t['id'].startswith('task5')][:n])
@@ -492,7 +557,7 @@ index 3bd2312..d57dd9f 100644
                                                                                 functions=json.dumps(self.funcs),
                                                                                 context=case['context'],
                                                                                 question=case['instruction'])})
-@@ -72,6 +270,8 @@ class MedAgentBench(Task):
+@@ -72,6 +273,8 @@ class MedAgentBench(Task):
                      history=session.history
                  )
                  r = res.content.strip().replace('```tool_code', '').replace('```', '').strip() #Remove separator for Gemini2.0Flash

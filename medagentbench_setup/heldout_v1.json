@@ -1,0 +1,264 @@
+{
+ "name": "heldout_v1",
+ "description": "20 held-out MedAgentBench cases (none of the 10 development cases: task9 240-244, task5 120-124). 10 order-required, 10 no-order. 8 order-required cases are made by adding one synthetic newest lab result on the local FHIR server.",
+ "reference_time": "2023-11-13T10:15:00+00:00",
+ "dev_indices": [
+  240,
+  241,
+  242,
+  243,
+  244,
+  120,
+  121,
+  122,
+  123,
+  124
+ ],
+ "indices": [
+  125,
+  127,
+  128,
+  131,
+  132,
+  134,
+  136,
+  140,
+  144,
+  146,
+  245,
+  246,
+  247,
+  249,
+  252,
+  253,
+  255,
+  258,
+  260,
+  268
+ ],
+ "cases": [
+  {
+   "index": 125,
+   "task": "task5",
+   "mrn": "S2075210",
+   "latest_value_24h": 2.1,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 127,
+   "task": "task5",
+   "mrn": "S1891852",
+   "latest_value_24h": 1.4,
+   "order_required": true,
+   "synthetic": true
+  },
+  {
+   "index": 128,
+   "task": "task5",
+   "mrn": "S3195056",
+   "latest_value_24h": null,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 131,
+   "task": "task5",
+   "mrn": "S2016972",
+   "latest_value_24h": 0.8,
+   "order_required": true,
+   "synthetic": true
+  },
+  {
+   "index": 132,
+   "task": "task5",
+   "mrn": "S6521727",
+   "latest_value_24h": null,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 134,
+   "task": "task5",
+   "mrn": "S1733937",
+   "latest_value_24h": null,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 136,
+   "task": "task5",
+   "mrn": "S6192632",
+   "latest_value_24h": 1.6,
+   "order_required": true,
+   "synthetic": true
+  },
+  {
+   "index": 140,
+   "task": "task5",
+   "mrn": "S3084624",
+   "latest_value_24h": 1.8,
+   "order_required": true,
+   "synthetic": false
+  },
+  {
+   "index": 144,
+   "task": "task5",
+   "mrn": "S6542579",
+   "latest_value_24h": 1.9,
+   "order_required": true,
+   "synthetic": false
+  },
+  {
+   "index": 146,
+   "task": "task5",
+   "mrn": "S6547257",
+   "latest_value_24h": 2.7,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 245,
+   "task": "task9",
+   "mrn": "S6550473",
+   "latest_value": 4.3,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 246,
+   "task": "task9",
+   "mrn": "S6268253",
+   "latest_value": 3.4,
+   "order_required": true,
+   "synthetic": true,
+   "expected_dose_mEq": 10
+  },
+  {
+   "index": 247,
+   "task": "task9",
+   "mrn": "S1635224",
+   "latest_value": 3.8,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 249,
+   "task": "task9",
+   "mrn": "S3084624",
+   "latest_value": 3.2,
+   "order_required": true,
+   "synthetic": true,
+   "expected_dose_mEq": 30
+  },
+  {
+   "index": 252,
+   "task": "task9",
+   "mrn": "S3057899",
+   "latest_value": 3.0,
+   "order_required": true,
+   "synthetic": true,
+   "expected_dose_mEq": 50
+  },
+  {
+   "index": 253,
+   "task": "task9",
+   "mrn": "S6547257",
+   "latest_value": 3.7,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 255,
+   "task": "task9",
+   "mrn": "S2823623",
+   "latest_value": 2.8,
+   "order_required": true,
+   "synthetic": true,
+   "expected_dose_mEq": 70
+  },
+  {
+   "index": 258,
+   "task": "task9",
+   "mrn": "S6329254",
+   "latest_value": 3.5,
+   "order_required": false,
+   "synthetic": false
+  },
+  {
+   "index": 260,
+   "task": "task9",
+   "mrn": "S6426560",
+   "latest_value": 3.3,
+   "order_required": true,
+   "synthetic": true,
+   "expected_dose_mEq": 20
+  },
+  {
+   "index": 268,
+   "task": "task9",
+   "mrn": "S6500497",
+   "latest_value": 3.6,
+   "order_required": false,
+   "synthetic": false
+  }
+ ],
+ "synthetic_observations": [
+  {
+   "index": 246,
+   "mrn": "S6268253",
+   "code": "K",
+   "value": 3.4,
+   "time": "2023-11-13T09:00:00+00:00"
+  },
+  {
+   "index": 249,
+   "mrn": "S3084624",
+   "code": "K",
+   "value": 3.2,
+   "time": "2023-11-13T09:00:00+00:00"
+  },
+  {
+   "index": 252,
+   "mrn": "S3057899",
+   "code": "K",
+   "value": 3.0,
+   "time": "2023-11-13T09:00:00+00:00"
+  },
+  {
+   "index": 255,
+   "mrn": "S2823623",
+   "code": "K",
+   "value": 2.8,
+   "time": "2023-11-13T09:00:00+00:00"
+  },
+  {
+   "index": 260,
+   "mrn": "S6426560",
+   "code": "K",
+   "value": 3.3,
+   "time": "2023-11-13T09:00:00+00:00"
+  },
+  {
+   "index": 127,
+   "mrn": "S1891852",
+   "code": "MG",
+   "value": 1.4,
+   "time": "2023-11-13T09:30:00+00:00"
+  },
+  {
+   "index": 131,
+   "mrn": "S2016972",
+   "code": "MG",
+   "value": 0.8,
+   "time": "2023-11-13T09:30:00+00:00"
+  },
+  {
+   "index": 136,
+   "mrn": "S6192632",
+   "code": "MG",
+   "value": 1.6,
+   "time": "2023-11-13T09:30:00+00:00"
+  }
+ ]
+}

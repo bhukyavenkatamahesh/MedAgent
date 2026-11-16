@@ -1,0 +1,11 @@
+episode_id,task_id,turn,action_type,tool,evidence_observed,labels,reasons,input_provenance,evidence_resource_ids
+task5_27#146,task5_27,1,FINISH,finish,,INCOMPLETE_EVIDENCE_FAILURE,,UNSPECIFIED,
+task5_25#144,task5_25,1,FINISH,finish,,INCOMPLETE_EVIDENCE_FAILURE,,UNSPECIFIED,
+task5_21#140,task5_21,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not backed by relevant returned evidence: 103 (not_retrieved),UNSPECIFIED,
+task5_17#136,task5_17,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not backed by relevant returned evidence: 103 (not_retrieved),UNSPECIFIED,
+task5_15#134,task5_15,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_SUCCESS,numbers not backed by relevant returned evidence: 103 (not_retrieved),UNSPECIFIED,
+task5_13#132,task5_13,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_SUCCESS,numbers not backed by relevant returned evidence: 100 (not_retrieved),UNSPECIFIED,
+task5_12#131,task5_12,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not backed by relevant returned evidence: 103 (not_retrieved),UNSPECIFIED,
+task5_9#128,task5_9,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_SUCCESS,numbers not backed by relevant returned evidence: 103 (not_retrieved),UNSPECIFIED,
+task5_8#127,task5_8,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not backed by relevant returned evidence: 103 (not_retrieved),UNSPECIFIED,
+task5_6#125,task5_6,1,FINISH,finish,,UNSUPPORTED_CLAIM|INCOMPLETE_EVIDENCE_FAILURE,numbers not backed by relevant returned evidence: 100 (not_retrieved),UNSPECIFIED,

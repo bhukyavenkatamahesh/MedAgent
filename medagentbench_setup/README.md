@@ -37,6 +37,17 @@ Environment variables read by the task worker (set them when starting `src.start
   - `3` (v3): **format only**. The same reply rules + three unrelated one-line format samples, with no sequence and no decision.
   - `4` (v4): v2 + an explicit **decision step** (newest result, compare with the threshold, order only if low, report only the newest value).
 
+- `CASE_INDICES=125,127,...`: runs exactly these case indices (overrides `SAMPLE_N`). Used for the held-out set.
+
+Held-out set: `heldout_v1.json` lists 20 cases (10 order-required, 10 no-order) and the 8 synthetic lab results that create the extra order-required cases. Add them to the local FHIR server before a run and remove them afterwards:
+
+```bash
+python scripts/heldout_fhir.py add    --spec medagentbench_setup/heldout_v1.json
+python scripts/heldout_fhir.py remove --spec medagentbench_setup/heldout_v1.json
+```
+
+The FHIR server caches search results for about 60 s, so wait a minute after `add`. Seeded repeat agents (`<model>-ctx8k-t07-s1..3`, temperature 0.7) are in the patch. Score with `scripts/summarize_heldout.py`.
+
 For the 8192-token agents, copy any `slm_*.yaml` assignment and replace the agent name with `llama3.2-1b-ctx8k` or `qwen2.5-1.5b-ctx8k`.
 
-Results: `runs/2026-11-16_slm-1b_sample_n10/` (4 models, base prompt), `runs/2026-11-16_slm-fewshot_n10/` (base vs few-shot) and `runs/2026-11-16_slm-ablation_n10/` (format-only vs clinical sequence vs decision step).
+Results: `runs/2026-11-16_slm-1b_sample_n10/` (4 models, base prompt), `runs/2026-11-16_slm-fewshot_n10/` (base vs few-shot) , `runs/2026-11-16_slm-ablation_n10/` (format-only vs clinical sequence vs decision step) and `runs/2026-11-16_slm-heldout_n20/` (held-out, balanced, repeated).

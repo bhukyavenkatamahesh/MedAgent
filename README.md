@@ -120,8 +120,11 @@ Real benchmark-agent runs done so far, all on a local MedAgentBench + FHIR serve
 | On-device SLMs, base prompt | Llama 3.2 1B, Gemma 3 1B, Qwen 2.5 1.5B, LFM2 1.2B | 5 task9 + 5 task5 | `runs/2026-11-16_slm-1b_sample_n10/` |
 | Base vs few-shot prompt | Llama 3.2 1B, Qwen 2.5 1.5B | same 10 | `runs/2026-11-16_slm-fewshot_n10/` |
 | Prompt ablation (format-only vs clinical sequence vs decision step) | Llama 3.2 1B, Qwen 2.5 1.5B | same 10 | `runs/2026-11-16_slm-ablation_n10/` |
+| Held-out, balanced, repeated (4 runs per condition) | Llama 3.2 1B, Qwen 2.5 1.5B | 20 held-out: 10 order-required, 10 no-order | `runs/2026-11-16_slm-heldout_n20/` |
 
-Not done yet: a larger held-out evaluation with repeats, human annotation of the labels, clinical review of the policies, fine-tuning.
+Main result so far: on the balanced held-out set, **no model placed a correct order in any run**. Qwen 2.5 1.5B reads the lab and never orders; Llama 3.2 1B orders without evidence.
+
+Not done yet: the full 30 + 30 cases, per-case seeds, a "missed action" label, human annotation of the labels, clinical review of the policies, fine-tuning.
 
 ## Outcome dimensions
 

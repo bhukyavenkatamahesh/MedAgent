@@ -175,3 +175,15 @@ Still open for supervisor review:
 4. Should an answer that lists older values as well as the latest one count as grounded
    (it does today, because every number was returned)?
 
+## 2026-11-16 (c): held-out, balanced, repeated evaluation
+
+- Held-out set `medagentbench_setup/heldout_v1.json`: 20 cases not used in prompt
+  development, 10 order-required and 10 no-order. 8 order-required cases are made
+  by adding one synthetic newest lab result on the local FHIR server
+  (`scripts/heldout_fhir.py`); the unmodified benchmark grader reads the server.
+  The resources are removed after the runs.
+- Repeats: 1 run at temperature 0 plus 3 runs at temperature 0.7 (seeds 1 to 3).
+  Known weakness: one seed per run, so cases within a run are correlated.
+- Result (`runs/2026-11-16_slm-heldout_n20/`): 0 of 240 order-required episodes
+  passed. This raises the priority of open point 3 (a "missed action" label).
+
