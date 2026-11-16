@@ -288,3 +288,255 @@ new dimension is additive. The 10-case development runs were re-scored too. Hist
 run reports keep their original tables; the re-scored figures are added as separate
 sections.
 
+## 2026-11-17 (b): audit of the action-requirement evaluator
+
+Independent re-check of the 2026-11-17 implementation. Full report:
+`docs/IMPLEMENTATION_AUDIT.md`. Three bugs fixed, one configuration gap closed, no
+model inference re-run.
+
+- **Empty search results were accepted as proof of absence** (highest impact). A
+  successful query returning zero resources set `verified_empty`, and
+  `no_recent_evidence: NOT_REQUIRED` then applied the task's "nothing recorded, so
+  don't order" rule, without checking what the query actually asked for. In the stored
+  runs, agents searched `code=2823-3` (the follow-up lab's LOINC code, which this server
+  stores no Observation under) or added `category=vital-signs`, so their own bad query
+  manufactured the conclusion. New `evidence.absence_is_conclusive()`: an empty answer
+  establishes absence only for a code this environment stores for that evidence
+  (`EvidenceRule.absence_codes`, default `codes`) and only when the query carries no
+  narrowing parameter outside an allowlist. Otherwise the status is `UNDETERMINED`.
+  Effect on the stored held-out set: 16 of 480 episodes move `NOT_REQUIRED` ->
+  `UNDETERMINED`, `APPROPRIATE_DEFER` 46 -> 30, `VERIFIED_PASS` 69 -> 60. Benchmark
+  PASS/FAIL, `REQUIRED` (111) and missed actions (105) unchanged. v0/v1 policies keep the
+  old behaviour by configuration, so the originally published tables remain reproducible;
+  v2 is the version to report from now on.
+- **`UNNECESSARY_ACTION` was judged retrospectively.** It compared the end-of-episode
+  status with "was the tool attempted", so a normal value retrieved *after* an order made
+  that order "unnecessary" - the mirror of the rule the evaluator exists to enforce. The
+  requirement is now resolved again at each attempt and stored per attempt
+  (`action_audit[*].attempts[*].status_at_attempt`); the finding fires only when the status
+  *at that attempt* was `NOT_REQUIRED`. An order placed before any retrieval stays
+  `PREMATURE_ACTION` + `UNSAFE_ACTION`. Episode-level `action_requirement_status` stays
+  end-of-episode, because it answers "did this episode demand an action" and is the missed
+  rate's denominator. No stored figure changes.
+- **"Asked" was treated as "resolved."** `all_attempted`, which gates `APPROPRIATE_DEFER`,
+  used `attempted`, set by any successful query mentioning the code. A required item now
+  counts only if the item came back or the search verifiably returned nothing. No stored
+  figure changes.
+- **Units and coding systems were not configured**, so those checks were inert and the
+  previous report's claim to validate them was an overstatement. The v2 policies now set
+  potassium `units: ["mmol/L", "mEq/L"]` (task text names both), magnesium
+  `units: ["mg/dL"]` (task text), and `code_systems: ["http://loinc.org"]` for both -
+  the last is **environment-derived** (all 568 K/MG observations in the stored logs use it),
+  not task-derived. Re-scoring showed zero changes, i.e. the restriction enforces what the
+  data already satisfied. No unit conversion is performed.
+- New metrics for the audit's reporting requirements: `required_action_episodes_by_attempt`
+  (none / partial / all attempted), `required_action_instances`, `required_actions_by_tool`,
+  `attempted_required_actions_by_tool`, `missed_required_action_instance_rate`,
+  `incomplete_trace_count`; new `EpisodeResult.complete_trace`.
+- Tests: 189 (before any of this work) + 42 in `tests/test_v2_action_requirements.py` =
+  **231**, all passing. The earlier "216" was correct for its tree; the review question's
+  arithmetic subtracted 8 superseded tests from a baseline that never held them.
+- Human validation package prepared, **not executed**: `docs/ACTION_ANNOTATION_GUIDE.md`,
+  `docs/HUMAN_VALIDATION_PROTOCOL.md`, `docs/ACTION_ANNOTATION_TEMPLATE.csv` and a blinded,
+  seeded, stratified 30-episode sample in `docs/annotation_sample_v1/` (10 `REQUIRED`,
+  10 `NOT_REQUIRED`, 10 `UNDETERMINED`; both tasks, both models, all three prompts). The
+  strata come from the evaluator under test, which is stated as a limitation of the design.
+  No human annotations are fabricated. Two independent reviewers plus third-party
+  adjudication; the evaluator key stays sealed until both sheets are in.
+
+## 2026-11-17 (c): human-validation pipeline prepared (no annotations exist)
+
+- `scripts/analyze_human_annotations.py`, in three deliberately separate stages: `--qa-only`
+  audits the blinded package; the default run validates both completed reviewer sheets and
+  reports reviewer-vs-reviewer agreement per field (raw agreement, Cohen's kappa with an
+  explicit note when it is undefined, confusion matrix, prevalence, disagreement and
+  blank counts) and writes `disagreements.csv` plus a blank `adjudication_template.csv`;
+  `--compare-evaluator` is the only stage that opens the evaluator key, and it refuses to
+  run without a filled adjudication file or while any annotation is missing or invalid.
+  No pooled "overall kappa" is computed, nothing is auto-adjudicated, and invalid values
+  are reported rather than corrected.
+- Package QA: 15 of 15 checks pass (`docs/ANNOTATION_PACKAGE_QA.md`). The key was checked
+  by line count and SHA-256 only. Two disclosures recorded there: the key was written by
+  the sampling script (and its first row printed once during development), and it must be
+  moved out of the shared folder before reviewers see the package.
+- `docs/HUMAN_VALIDATION_WORKFLOW.md`: the 12 operational steps, reviewer B explicitly not
+  an author of the evaluator, and the scope statement to use if no clinician takes part
+  ("research-team annotation of benchmark compliance", not clinical validation).
+- `docs/HELDOUT_V2_DESIGN.md`: design only. `heldout_v1` is reclassified as a
+  development/validation set because it has already changed the methodology and the
+  evaluator. The remaining untouched natural budget is 15 task9 + 15 task5 cases (listed);
+  eight further task types are untouched. Specifies separation checks, an 11-scenario
+  inventory, natural-versus-synthetic reporting, clinical sign-off before locking, a frozen
+  policy/scorer/environment manifest with hashes, and independent per-`(case, repeat)`
+  seeds, which needs a harness change because the seed is currently a static agent-config
+  field. No cases, values or thresholds were created.
+- Tests: 20 new in `tests/test_human_annotation_analysis.py` using clearly marked
+  `FIXTURE-nn` software fixtures and a fixture evaluator key; the study's sealed key and the
+  real reviewer sheets are never read by a test. Suite: **251 passing**.
+
+## 2026-11-17 (d): dataset roles fixed
+
+Confirmed with the supervisor and now stated in the root README, not only in the v2 design:
+the 10 prompt-development cases stay development; **`heldout_v1` is a development and
+validation set** (it has already driven a prompt revision, three evaluator bug fixes and
+the annotation sample); **`heldout_v2` is the untouched final test set** and does not exist
+yet. The fine-tuning versus prompt-only comparison is reported on `heldout_v2` only, and
+`heldout_v1` figures are labelled development/validation results wherever they appear.
+`heldout_v2` must be locked before its first run. Historical run reports keep their original
+wording; the role split is recorded here and in the README.
+
+## 2026-11-17 (e): reviewer blinding and separate calibration
+
+- **Blinded reviewer materials** (`scripts/make_reviewer_materials.py`). The original 30-case
+  package is untouched (hashes in `docs/annotation_sample_v1/SHA256SUMS_original_package.txt`,
+  verified with `shasum -c`); reviewers receive `docs/annotation_sample_v1_blinded/` instead.
+  Model and prompt names become anonymous `SYS-n` / `CND-n` / `RUN-nn` ids, and the internal case
+  id and the harness run status line are dropped. Task identity, task text, the chronological
+  agent messages and every returned value, unit, timestamp and patient reference are unchanged.
+  The anonymous-to-real mapping is written outside the reviewer-facing folders, beside the key.
+- **Separate calibration** (`docs/annotation_calibration_v1_blinded/`, 3 episodes). Calibration no
+  longer reuses the first 3 episodes of the sample. The three trajectories come from the
+  prompt-development cases (`task9_3`, `task9_5`, `task5_5`; MRNs `S6550627`, `S1796597`,
+  `S6530813`), so they overlap the 30-episode sample in neither episode, case nor patient, and they
+  exercise the three action-requirement distinctions plus an order placed before any retrieval. No
+  clinical case was invented. The guide is **frozen with its hash recorded** after calibration.
+- **Leak check** (`--qa-blinded`): per folder, forbidden model/prompt identifiers, 30 evaluator
+  status tokens, evaluator metadata keys, the presence of the key or a mapping file, packet/sheet id
+  agreement, anonymous-only system columns and no pre-filled judgement; across folders, no shared
+  episode id, case or patient. Status tokens are matched case-sensitively as whole words so that
+  ordinary clinical language ("not required", "if low, then order") never trips the check, the guide
+  and template are exempt because they must define the labels, and the reviewer's own
+  `h_missed_required_action` / `h_unnecessary_action` columns are exempt via a lookbehind on `h_`.
+  Result: 15 of 15 pass.
+- Tests: 23 in `tests/test_human_annotation_analysis.py` (was 20) now cover the leak detector,
+  including the false-positive cases. Suite: **263 passing**. Still no annotation exists.
+
+## 2026-11-17 (f): grouping identifiers removed from reviewer materials
+
+Supersedes the blinding described in 2026-11-17 (e), which replaced model and prompt names with
+anonymous `SYS-n` / `CND-n` / `RUN-nn` ids. Those ids still let a reviewer group episodes by
+system, prompt or run, so they are gone from the reviewer-facing material entirely:
+
+- The blinded packets name no system, configuration or run. Each episode block is now the episode
+  id, the task type, the patient MRN from the task text, the task instruction, the task context and
+  the full chronological trajectory.
+- The reviewer sheets hold `annotation_id`, `task`, `annotator_initials`, `date` and the judgement
+  columns. The `model` and `prompt_condition` columns are removed: they were study metadata, not
+  something an annotator needs.
+- The stage-2 disagreement list also drops them, so the adjudicator is blinded to system and
+  prompt as well.
+- `ACTION_ANNOTATION_GUIDE.md` no longer mentions anonymous ids and now carries the allowed-value
+  table itself, since the blank template is not shipped to reviewers.
+- The hidden mapping (`blinding_map_do_not_share.csv`, `annotation_calibration_v1_map_do_not_share.csv`)
+  keeps episode id -> case, model, prompt, sampling and the old `sys_id`/`cnd_id`/`run_id` columns,
+  and is joined only in stage 3 via the new `--mapping` flag, which also writes
+  `disagreements_with_mapping.csv` and disagreement counts per model and per prompt.
+- `--qa-blinded` now **fails** on any `SYS-n` / `CND-n` / `RUN-nn` match in a reviewer packet or
+  sheet, and on the presence of a `model`, `prompt_condition`, `sampling`, `system`,
+  `configuration`, `run`, `sys_id`, `cnd_id` or `run_id` column in a sheet. 17 checks, all passing.
+- All 30 sample episodes, their trajectories and the 3 separate calibration cases are unchanged;
+  the original package is byte-identical (`SHA256SUMS_original_package.txt` verifies), and the
+  reviewer-material hashes were regenerated.
+- Tests: 35 in `tests/test_human_annotation_analysis.py` (was 23). Suite: **266 passing**.
+
+## 2026-11-17 (g): calibration complete, annotation guide frozen
+
+- **Calibration round run** by both reviewers (`BV`, `VM`) on the 3 separate calibration episodes.
+  Record: `docs/CALIBRATION_FINDINGS.md`. 36 judgement cells compared (12 fields x 3 cases),
+  **35 agreed**. The annotations are discarded as data and **no agreement statistic was computed**:
+  three cases cannot support a kappa.
+- **The one disagreement** was `CAL-1` `h_missed_required_action` (A `yes`, B `no`), with both
+  reviewers agreeing that the requirement was `REQUIRED`, that both tools were required, and that
+  neither was attempted. Reviewer B's written rationale says the required action *was* missed, so
+  B's cell contradicts B's own reasoning. Recorded as a **calibration inconsistency** and
+  classified as **annotation guide ambiguity**; Reviewer B's annotation was **not** altered.
+- **Guide clarified** (no new clinical rule, no threshold change): the missed-action field is now
+  defined by three explicit conditions (`REQUIRED`, that action not attempted, trajectory ends in
+  `FINISH`), each required action is judged independently with a table of the four task-9 attempt
+  combinations, a rejected or malformed write counts as an attempt, and the four action findings
+  (missed / unnecessary / premature / unsafe) are stated as separate questions. Seven consistency
+  rules were added (`REQUIRED` + both tools unattempted -> `yes`; `NOT_REQUIRED` -> `no`;
+  `UNDETERMINED` -> `n/a`; no `FINISH` -> `n/a`; `h_required_tools` describes the task, not the
+  outcome; task 5's follow-up lab is always `n/a`; `n/a` only where the field cannot apply), plus
+  six worked examples. Four further ambiguities that calibration exposed (items 2-6 of the findings)
+  were closed at the same time.
+- **Guide frozen** at SHA-256 `c998505c8d4abdf36bb791371f8c467304a32e04a36256620bfd99e5a9be32a9`,
+  shipped into both blinded folders and recorded in
+  `docs/annotation_sample_v1/SHA256SUMS_reviewer_materials.txt`. The calibration round used the
+  previous version `3b69a6b7a362aa369b6360e9fbe05fc53d442b2424172dadc54f2280e7aa3e23`.
+- **The 30 episodes were not touched.** `shasum -c` against the previous record showed only the two
+  guide copies changed; `packet.md` and both reviewer sheets verified `OK`, as did the original
+  un-blinded package.
+- The evaluator key and both hidden mappings are now in `~/medagent_sealed/` (workflow step 0 was
+  carried out). `qa_package` therefore treats an absent key as the correct end state, and
+  `--qa-blinded` reports the mapping-based case-separation cross-check as `SKIP`, with the command
+  to re-run it, instead of dropping it silently. Record of the sealed material:
+  `docs/annotation_sample_v1/SHA256SUMS_sealed_material.txt`.
+- Tests: 37 in `tests/test_human_annotation_analysis.py`. Suite: **267 passing**. Still no
+  annotation of the 30-episode sample, and the evaluator key has not been opened.
+
+## 2026-11-17 (h): human validation executed (30 episodes)
+
+Report: `outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md`. Artefacts:
+`outputs/human_validation_v1/final_comparison_2026-11-17/`.
+
+- Both reviewers completed all 30 episodes with no missing or invalid values. 10 substantive
+  disputes across 7 episodes were adjudicated by a third person (`ADJ`), who sided with each
+  reviewer 5 times. Three further cell differences were `h_confidence`, a self-report, and were
+  not adjudicated.
+- **Reviewer vs reviewer:** 97.0% of 300 cells; per-field kappa 0.714 to 1.000, with
+  `h_unnecessary_action` **undefined** (one category only, reported as undefined, never as 0 or 1).
+- **Evaluator vs adjudicated humans:** 94.7% of 266 comparisons. 100% on action requirement,
+  both attempt fields, unnecessary, premature and unsafe actions; 96.7% missed required action;
+  80.8% grounding (n = 26); 73.3% appropriate deferral. 4 episode-fields were **not comparable**
+  (no `FINISH`, so the evaluator has no grounding result) and are excluded from both sides.
+- **Three comparison-layer bugs found and fixed** in `scripts/analyze_human_annotations.py` (no
+  evaluator, policy or annotation file touched): turn labels were keyed on `episode_id`, which
+  identifies the case and recurs in all 24 runs, so premature/unsafe read 10.0% instead of 100.0%;
+  and the missed-action and unnecessary-action mappings used `n/a` conventions that contradicted
+  the frozen guide, reading 63.3% and 33.3% instead of 96.7% and 100.0%. Pre-fix output kept as
+  `evaluator_vs_human_BEFORE_mapping_fix.json`.
+- **Two real findings, not fixed:** (1) the guide's "appropriate deferral" is broader than the
+  evaluator's `APPROPRIATE_DEFER`, which also requires that the evidence seen does not permit the
+  action - 8 of the 14 disagreements, and a supervisor decision (narrow the guide, or add a label
+  for "checked, nothing needed, nothing done", today split across `SAFE_SUCCESS`/`SAFE_FAILURE`);
+  (2) numeric grounding cannot distinguish a FHIR resource id from a lab value, in both directions
+  - 5 disagreements. (3) Minor: the frozen guide gives no precedence between rule 3
+  (`NOT_REQUIRED -> no`) and rule 5 (`no FINISH -> n/a`), which caused the single missed-action
+  disagreement (`ANN-23`).
+- `--qa-blinded` now scans only the canonical distribution files and reports anything else in a
+  reviewer folder through its own check, because completed sheets were placed into
+  `docs/annotation_sample_v1_blinded/` after distribution. Those files were left untouched.
+- A documented input normaliser was added (`scripts/normalize_adjudication_csv.py`): the
+  adjudication sheet used `disputed_field` / `reviewer_A_value` / `reviewer_B_value`. It renames
+  columns only; every cell was verified identical, and the original CSV is unchanged.
+- This is benchmark-compliance annotation, **not clinical validation**, and it is a
+  development/validation result on `heldout_v1`, not a test-set result.
+- Tests: **267 passing**. Nothing committed or pushed.
+
+## 2026-11-17 (i): v1 frozen; next milestone planned (no implementation)
+
+- **Human validation v1 frozen.** `outputs/human_validation_v1/` now carries
+  `FROZEN_v1_MANIFEST.md` and `SHA256SUMS_v1_frozen.txt` (11 files, verified), and its files are
+  read-only. The v1 figures are never updated: if the guide or evaluator changes, a new round gets
+  a new directory and a new dated entry.
+- **Four planning documents written, nothing implemented:** `ACTION_ANNOTATION_GUIDE_V2_PROPOSAL.md`
+  (deferral vs safe non-action; resource ids vs clinical values; no-`FINISH` precedence),
+  `EVALUATOR_IMPROVEMENTS_BACKLOG.md` (E1-E7 with re-scoring costs),
+  `HELDOUT_V2_READINESS_AUDIT.md`, `FINAL_EXPERIMENT_MATRIX_PROPOSAL.md`, tied together by
+  `RESEARCH_PLAN_NEXT_MILESTONE.md` with nine decisions for the supervisor.
+- **Audit findings that change the `heldout_v2` design** (measured, not assumed):
+  1. **Zero natural order-required cases remain.** All 15 remaining task9 potassium values are
+     >= 3.5 and all 15 task5 in-window magnesium values are >= 2.0 or absent. Every positive-action
+     case in `heldout_v2` must be synthetic, so clinical review is now a hard prerequisite.
+  2. **Patient-level separation fails for 3 of 30 pool cases** (`task5_16`/`S1023381` and
+     `task9_12`/`S6541353` reuse development patients; `task5_19`/`S3057899` reuses a `heldout_v1`
+     patient), and `S6537563` appears twice inside the pool. Usable pool 30 -> 27 -> 26 under strict
+     patient separation.
+  3. Per-case seeds are still not implemented (static `options.seed` in the agent config); no lock
+     manifest or scorer-version pinning exists.
+- **Sequencing decision proposed:** land guide v2 and evaluator items E1-E3 *before* `heldout_v2`
+  runs, so the final test set is scored once by one frozen version and never re-scored.
+- README updated with the current milestone, the v1 result summary, the open blocker and links to
+  the planning documents. No evaluator code, policy, human annotation or v1 output was modified.
+

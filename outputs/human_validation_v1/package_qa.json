@@ -1,0 +1,114 @@
+{
+ "checks": [
+  {
+   "check": "packet holds exactly 30 episodes",
+   "ok": true,
+   "detail": "found 30"
+  },
+  {
+   "check": "packet episode ids unique",
+   "ok": true,
+   "detail": "0 duplicates"
+  },
+  {
+   "check": "every episode carries the task instruction, context and a chronological trajectory",
+   "ok": true,
+   "detail": "all 30 complete"
+  },
+  {
+   "check": "returned observations show value, unit, timestamp and patient reference",
+   "ok": true,
+   "detail": "20/30 episodes return observations; 60 K/MG rows all carry value+unit+time+subject"
+  },
+  {
+   "check": "packet contains no evaluator label or status name",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "check": "reviewer A sheet loads cleanly",
+   "ok": true,
+   "detail": "ok"
+  },
+  {
+   "check": "reviewer B sheet loads cleanly",
+   "ok": true,
+   "detail": "ok"
+  },
+  {
+   "check": "both sheets carry the same episode ids",
+   "ok": true,
+   "detail": "A=30 B=30 packet=30"
+  },
+  {
+   "check": "no judgement is pre-filled in either sheet (nothing fabricated)",
+   "ok": true,
+   "detail": "{}"
+  },
+  {
+   "check": "sheets pre-fill only id/task/model/prompt context",
+   "ok": true,
+   "detail": "task, model and prompt_condition present on every row"
+  },
+  {
+   "check": "every sheet field is known to this script and to the guide/template",
+   "ok": true,
+   "detail": "all fields recognised"
+  },
+  {
+   "check": "blank template header matches the reviewer sheets",
+   "ok": true,
+   "detail": "identical column list"
+  },
+  {
+   "check": "guide defines every label the sheet asks for",
+   "ok": true,
+   "detail": "all defined"
+  },
+  {
+   "check": "evaluator key is not in the package directory (moved out, as the workflow requires)",
+   "ok": true,
+   "detail": "absent from the shared folder"
+  },
+  {
+   "check": "both tasks, both models and all three prompt conditions appear",
+   "ok": true,
+   "detail": "{\"v4-decision-step\": 9, \"v3-format-only\": 10, \"v2-clinical-sequence\": 11}"
+  }
+ ],
+ "package": "docs/annotation_sample_v1",
+ "key": {
+  "file": "EVALUATOR_KEY_do_not_open_before_annotating.csv",
+  "in_package": false
+ },
+ "coverage": {
+  "by_task": {
+   "task9": 17,
+   "task5": 13
+  },
+  "by_model": {
+   "llama3.2-1b": 16,
+   "qwen2.5-1.5b": 14
+  },
+  "by_prompt": {
+   "v4-decision-step": 9,
+   "v3-format-only": 10,
+   "v2-clinical-sequence": 11
+  },
+  "cells": {
+   "task5 / llama3.2-1b / v2-clinical-sequence": 1,
+   "task5 / llama3.2-1b / v3-format-only": 3,
+   "task5 / llama3.2-1b / v4-decision-step": 1,
+   "task5 / qwen2.5-1.5b / v2-clinical-sequence": 2,
+   "task5 / qwen2.5-1.5b / v3-format-only": 3,
+   "task5 / qwen2.5-1.5b / v4-decision-step": 3,
+   "task9 / llama3.2-1b / v2-clinical-sequence": 5,
+   "task9 / llama3.2-1b / v3-format-only": 3,
+   "task9 / llama3.2-1b / v4-decision-step": 3,
+   "task9 / qwen2.5-1.5b / v2-clinical-sequence": 3,
+   "task9 / qwen2.5-1.5b / v3-format-only": 1,
+   "task9 / qwen2.5-1.5b / v4-decision-step": 2
+  }
+ },
+ "passed": true
+}

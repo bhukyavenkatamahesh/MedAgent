@@ -1,0 +1,5 @@
+annotation_id,field,task,human_value,evaluator_value,reason
+ANN-09,h_final_claims_grounded,task9,no_numeric_claim,,"evaluator label is null (no FINISH turn, so the episode has no grounding result)"
+ANN-13,h_final_claims_grounded,task9,ungrounded,,"evaluator label is null (no FINISH turn, so the episode has no grounding result)"
+ANN-20,h_final_claims_grounded,task5,no_numeric_claim,,"evaluator label is null (no FINISH turn, so the episode has no grounding result)"
+ANN-23,h_final_claims_grounded,task9,no_numeric_claim,,"evaluator label is null (no FINISH turn, so the episode has no grounding result)"

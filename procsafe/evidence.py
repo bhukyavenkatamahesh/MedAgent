@@ -153,6 +153,33 @@ def requested_evidence(request: str, policy: Policy, patient_id: Optional[str] =
     return names
 
 
+# Parameters that only shape presentation or the patient/code selection. Anything else (category,
+# date, status, value ranges...) narrows the search, so an empty answer no longer proves absence.
+_ABSENCE_SAFE_PARAMS = {"patient", "subject", "code", "_sort", "_count", "_format", "_total",
+                        "_pretty", "_elements", "_summary"}
+
+
+def absence_is_conclusive(request: str, rule: EvidenceRule) -> bool:
+    """Does an EMPTY response to this query show the chart holds no such evidence?
+
+    Only if the agent searched on a code the environment actually uses for this evidence
+    (`rule.absence_codes`, default `rule.codes`) and added no narrowing filters. An empty answer to
+    a code this server never stores, or to a query carrying `category=vital-signs`, is an artefact
+    of the agent's own query, not a fact about the record.
+    """
+    if not isinstance(request, str) or not request:
+        return False
+    try:
+        query = urlparse(request).query or request
+    except ValueError:
+        return False
+    params = parse_qs(query)
+    if set(params) - _ABSENCE_SAFE_PARAMS:
+        return False
+    codes = {token.strip().rsplit("|", 1)[-1] for raw in params.get("code", []) for token in raw.split(",")}
+    return bool(codes & set(rule.absence_codes or rule.codes))
+
+
 def evaluate_item(item: Optional[EvidenceItem], rule: EvidenceRule, now: Optional[datetime]) -> tuple[bool, str]:
     """Return (satisfied, reason) for one evidence item under its rule."""
     if item is None:

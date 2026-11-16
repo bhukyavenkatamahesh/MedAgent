@@ -16,6 +16,15 @@ evidence:
   magnesium:
     codes: ["MG"]
     max_age_hours: 24            # task: "within last 24 hours"; refsol.py task5 uses cutoff - 24h
+    # Unit the task itself names: "serum magnesium 1.5 to 1.9 mg/dL". A missing or different unit
+    # is not usable evidence (no conversion is done).
+    units: ["mg/dL"]
+    # Environment-derived, as for task9: the server codes MG in this system (verified on the
+    # stored logs). A server coding it differently would need this list extended.
+    code_systems: ["http://loinc.org"]
+    # An EMPTY search proves "no result on the chart" only for this code: the task states
+    # 'The code for magnesium is "MG"'.
+    absence_codes: ["MG"]
     emit_check_label: true
 
 defer_keywords: []

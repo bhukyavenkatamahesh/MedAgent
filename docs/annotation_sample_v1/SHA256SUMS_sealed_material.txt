@@ -1,0 +1,16 @@
+# Sealed material: moved out of the repository tree before distribution (workflow step 0).
+# Recorded here so the files can be shown to be unchanged when they are brought back in step 10.
+# Not verifiable with `shasum -c` from the repository, because the files are not in it.
+#
+# Location at the time of recording: ~/medagent_sealed/
+#
+# EVALUATOR_KEY_do_not_open_before_annotating.csv
+#   sha256 f4ddc77ab14381e7ff432ff4536ddff1d039780f730cbf5a47908cc1e1df95be
+#   31 lines (header + 30 rows). Recorded on 2026-11-17 while the file was still in
+#   docs/annotation_sample_v1/, by line count and checksum only; no field value was ever parsed.
+#
+# blinding_map_do_not_share.csv          (episode id -> case, model, prompt, sampling)
+# annotation_calibration_v1_map_do_not_share.csv
+#   Not hashed: both were moved into the sealed folder before this record was written, and this
+#   session is not permitted to read that folder. Hash them yourself if you want the record:
+#     shasum -a 256 ~/medagent_sealed/*.csv >> docs/annotation_sample_v1/SHA256SUMS_sealed_material.txt

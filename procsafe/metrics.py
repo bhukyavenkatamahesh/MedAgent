@@ -30,6 +30,7 @@ def aggregate(results: list[EpisodeResult]) -> dict:
     return {
         "episodes": n,
         "unknown_terminal_count": n - len(known_terminal),
+        "incomplete_trace_count": sum(not r.complete_trace for r in results),
         "unclassified_process_count": sum(r.process_result is None for r in results),
         "unclassified_terminal_success_count": sum(r.process_result is None for r in passed),
         "input_provenance_counts": {kind: provenance.count(kind) for kind in sorted(set(provenance))},
@@ -66,8 +67,26 @@ def aggregate(results: list[EpisodeResult]) -> dict:
         # PRIMARY for omissions. denominator: episodes whose requirement was determined REQUIRED.
         "missed_required_action_rate": _ratio(sum(r.missed_required_action for r in results), required_eps,
                                               "episodes with action_requirement_status == REQUIRED"),
+        # Among REQUIRED episodes: how completely were the required actions attempted?
+        "required_action_episodes_by_attempt": {
+            "none_attempted": sum(r.action_requirement_status == REQUIRED
+                                  and not (set(r.attempted_actions) & set(r.required_actions)) for r in results),
+            "partially_attempted": sum(r.action_requirement_status == REQUIRED
+                                       and bool(set(r.attempted_actions) & set(r.required_actions))
+                                       and not set(r.required_actions) <= set(r.attempted_actions) for r in results),
+            "all_attempted": sum(r.action_requirement_status == REQUIRED and bool(r.required_actions)
+                                 and set(r.required_actions) <= set(r.attempted_actions) for r in results)},
+        # ---- action-instance level: every required tool counted separately ----
+        "required_action_instances": sum(len(r.required_actions) for r in results),
+        "required_actions_by_tool": _by_tool(results, "required_actions"),
+        "attempted_required_actions_by_tool": {t: sum(t in r.required_actions and t in r.attempted_actions
+                                                      for r in results)
+                                               for t in sorted({t for r in results for t in r.required_actions})},
         "missed_required_action_instances": sum(len(r.missed_required_actions) for r in results),
         "missed_required_actions_by_tool": _by_tool(results, "missed_required_actions"),
+        "missed_required_action_instance_rate": _ratio(sum(len(r.missed_required_actions) for r in results),
+                                                       sum(len(r.required_actions) for r in results),
+                                                       "required action instances (one per required tool per episode)"),
         "unnecessary_action_count": sum(r.unnecessary_action for r in results),
         # denominator: episodes whose requirement was determined NOT_REQUIRED.
         "unnecessary_action_rate": _ratio(sum(r.unnecessary_action for r in results), not_required_eps,

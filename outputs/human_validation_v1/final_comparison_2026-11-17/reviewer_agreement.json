@@ -1,0 +1,363 @@
+{
+ "episodes": 30,
+ "fields": [
+  {
+   "field": "h_action_requirement",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 1.0,
+   "n_disagreements": 0,
+   "kappa": 1.0,
+   "kappa_note": "ok",
+   "categories": [
+    "NOT_REQUIRED",
+    "REQUIRED",
+    "UNDETERMINED"
+   ],
+   "confusion": {
+    "NOT_REQUIRED": {
+     "NOT_REQUIRED": 10,
+     "REQUIRED": 0,
+     "UNDETERMINED": 0
+    },
+    "REQUIRED": {
+     "NOT_REQUIRED": 0,
+     "REQUIRED": 10,
+     "UNDETERMINED": 0
+    },
+    "UNDETERMINED": {
+     "NOT_REQUIRED": 0,
+     "REQUIRED": 0,
+     "UNDETERMINED": 10
+    }
+   },
+   "prevalence_a": {
+    "UNDETERMINED": 10,
+    "NOT_REQUIRED": 10,
+    "REQUIRED": 10
+   },
+   "prevalence_b": {
+    "UNDETERMINED": 10,
+    "NOT_REQUIRED": 10,
+    "REQUIRED": 10
+   },
+   "group": "Action requirement status"
+  },
+  {
+   "field": "h_required_tools",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 1.0,
+   "n_disagreements": 0,
+   "kappa": 1.0,
+   "kappa_note": "ok",
+   "categories": [
+    "both",
+    "medicationrequest.create"
+   ],
+   "confusion": {
+    "both": {
+     "both": 17,
+     "medicationrequest.create": 0
+    },
+    "medicationrequest.create": {
+     "both": 0,
+     "medicationrequest.create": 13
+    }
+   },
+   "prevalence_a": {
+    "both": 17,
+    "medicationrequest.create": 13
+   },
+   "prevalence_b": {
+    "both": 17,
+    "medicationrequest.create": 13
+   },
+   "group": "Action requirement status"
+  },
+  {
+   "field": "h_medicationrequest_attempted",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 0.9333333333333333,
+   "n_disagreements": 2,
+   "kappa": 0.7142857142857143,
+   "kappa_note": "ok",
+   "categories": [
+    "no",
+    "yes"
+   ],
+   "confusion": {
+    "no": {
+     "no": 25,
+     "yes": 0
+    },
+    "yes": {
+     "no": 2,
+     "yes": 3
+    }
+   },
+   "prevalence_a": {
+    "yes": 5,
+    "no": 25
+   },
+   "prevalence_b": {
+    "yes": 3,
+    "no": 27
+   },
+   "group": "Required action attempted"
+  },
+  {
+   "field": "h_servicerequest_attempted",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 1.0,
+   "n_disagreements": 0,
+   "kappa": 1.0,
+   "kappa_note": "ok",
+   "categories": [
+    "n/a",
+    "no"
+   ],
+   "confusion": {
+    "n/a": {
+     "n/a": 13,
+     "no": 0
+    },
+    "no": {
+     "n/a": 0,
+     "no": 17
+    }
+   },
+   "prevalence_a": {
+    "no": 17,
+    "n/a": 13
+   },
+   "prevalence_b": {
+    "no": 17,
+    "n/a": 13
+   },
+   "group": "Required action attempted"
+  },
+  {
+   "field": "h_missed_required_action",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 1.0,
+   "n_disagreements": 0,
+   "kappa": 1.0,
+   "kappa_note": "ok",
+   "categories": [
+    "n/a",
+    "no",
+    "yes"
+   ],
+   "confusion": {
+    "n/a": {
+     "n/a": 11,
+     "no": 0,
+     "yes": 0
+    },
+    "no": {
+     "n/a": 0,
+     "no": 10,
+     "yes": 0
+    },
+    "yes": {
+     "n/a": 0,
+     "no": 0,
+     "yes": 9
+    }
+   },
+   "prevalence_a": {
+    "n/a": 11,
+    "no": 10,
+    "yes": 9
+   },
+   "prevalence_b": {
+    "n/a": 11,
+    "no": 10,
+    "yes": 9
+   },
+   "group": "Missed required action"
+  },
+  {
+   "field": "h_unnecessary_action",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 1.0,
+   "n_disagreements": 0,
+   "kappa": null,
+   "kappa_note": "undefined: both reviewers used only one category (no)",
+   "categories": [
+    "no"
+   ],
+   "confusion": {
+    "no": {
+     "no": 30
+    }
+   },
+   "prevalence_a": {
+    "no": 30
+   },
+   "prevalence_b": {
+    "no": 30
+   },
+   "group": "Unnecessary action"
+  },
+  {
+   "field": "h_premature_action",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 0.9666666666666667,
+   "n_disagreements": 1,
+   "kappa": 0.8387096774193549,
+   "kappa_note": "ok",
+   "categories": [
+    "no",
+    "yes"
+   ],
+   "confusion": {
+    "no": {
+     "no": 26,
+     "yes": 0
+    },
+    "yes": {
+     "no": 1,
+     "yes": 3
+    }
+   },
+   "prevalence_a": {
+    "yes": 4,
+    "no": 26
+   },
+   "prevalence_b": {
+    "yes": 3,
+    "no": 27
+   },
+   "group": "Premature action"
+  },
+  {
+   "field": "h_unsafe_action",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 0.9333333333333333,
+   "n_disagreements": 2,
+   "kappa": 0.7142857142857143,
+   "kappa_note": "ok",
+   "categories": [
+    "no",
+    "yes"
+   ],
+   "confusion": {
+    "no": {
+     "no": 25,
+     "yes": 0
+    },
+    "yes": {
+     "no": 2,
+     "yes": 3
+    }
+   },
+   "prevalence_a": {
+    "yes": 5,
+    "no": 25
+   },
+   "prevalence_b": {
+    "yes": 3,
+    "no": 27
+   },
+   "group": "Process-safety judgement"
+  },
+  {
+   "field": "h_appropriate_deferral",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 0.9666666666666667,
+   "n_disagreements": 1,
+   "kappa": 0.9230769230769231,
+   "kappa_note": "ok",
+   "categories": [
+    "no",
+    "yes"
+   ],
+   "confusion": {
+    "no": {
+     "no": 20,
+     "yes": 0
+    },
+    "yes": {
+     "no": 1,
+     "yes": 9
+    }
+   },
+   "prevalence_a": {
+    "no": 20,
+    "yes": 10
+   },
+   "prevalence_b": {
+    "no": 21,
+    "yes": 9
+   },
+   "group": "Process-safety judgement"
+  },
+  {
+   "field": "h_final_claims_grounded",
+   "n_compared": 30,
+   "n_unannotated": 0,
+   "raw_agreement": 0.9,
+   "n_disagreements": 3,
+   "kappa": 0.8502495840266223,
+   "kappa_note": "ok",
+   "categories": [
+    "grounded",
+    "no_numeric_claim",
+    "ungrounded"
+   ],
+   "confusion": {
+    "grounded": {
+     "grounded": 7,
+     "no_numeric_claim": 0,
+     "ungrounded": 3
+    },
+    "no_numeric_claim": {
+     "grounded": 0,
+     "no_numeric_claim": 11,
+     "ungrounded": 0
+    },
+    "ungrounded": {
+     "grounded": 0,
+     "no_numeric_claim": 0,
+     "ungrounded": 9
+    }
+   },
+   "prevalence_a": {
+    "ungrounded": 9,
+    "grounded": 10,
+    "no_numeric_claim": 11
+   },
+   "prevalence_b": {
+    "ungrounded": 12,
+    "grounded": 7,
+    "no_numeric_claim": 11
+   },
+   "group": "Grounding judgement"
+  }
+ ],
+ "n_disagreement_entries": 9,
+ "validation": [
+  {
+   "reviewer": "A",
+   "rows": 30,
+   "missing": [],
+   "invalid": []
+  },
+  {
+   "reviewer": "B",
+   "rows": 30,
+   "missing": [],
+   "invalid": []
+  }
+ ],
+ "note": "Reviewer-vs-reviewer agreement only. No evaluator label was read. Agreement is reported per field; no pooled overall kappa is computed."
+}

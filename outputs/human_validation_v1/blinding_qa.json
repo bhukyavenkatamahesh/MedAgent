@@ -1,0 +1,87 @@
+{
+ "checks": [
+  {
+   "check": "annotation_sample_v1_blinded: no model/prompt identifier and no evaluator metadata",
+   "ok": true,
+   "detail": "scanned 4 files, clean"
+  },
+  {
+   "check": "annotation_sample_v1_blinded: contains no evaluator key and no blinding map",
+   "ok": true,
+   "detail": "neither present"
+  },
+  {
+   "check": "annotation_sample_v1_blinded: packet episode ids unique",
+   "ok": true,
+   "detail": "30 episodes"
+  },
+  {
+   "check": "annotation_sample_v1_blinded: no grouping identifier (SYS-n / CND-n / RUN-nn) anywhere",
+   "ok": true,
+   "detail": "none in any packet or sheet"
+  },
+  {
+   "check": "annotation_sample_v1_blinded: sheet ids match the packet",
+   "ok": true,
+   "detail": "sheets 30 vs packet 30"
+  },
+  {
+   "check": "annotation_sample_v1_blinded: sheets carry no system/configuration/run column",
+   "ok": true,
+   "detail": "episode id, task and judgement columns only"
+  },
+  {
+   "check": "annotation_sample_v1_blinded: no judgement pre-filled",
+   "ok": true,
+   "detail": "all judgement cells empty"
+  },
+  {
+   "check": "annotation_calibration_v1_blinded: no model/prompt identifier and no evaluator metadata",
+   "ok": true,
+   "detail": "scanned 4 files, clean"
+  },
+  {
+   "check": "annotation_calibration_v1_blinded: contains no evaluator key and no blinding map",
+   "ok": true,
+   "detail": "neither present"
+  },
+  {
+   "check": "annotation_calibration_v1_blinded: packet episode ids unique",
+   "ok": true,
+   "detail": "3 episodes"
+  },
+  {
+   "check": "annotation_calibration_v1_blinded: no grouping identifier (SYS-n / CND-n / RUN-nn) anywhere",
+   "ok": true,
+   "detail": "none in any packet or sheet"
+  },
+  {
+   "check": "annotation_calibration_v1_blinded: sheet ids match the packet",
+   "ok": true,
+   "detail": "sheets 3 vs packet 3"
+  },
+  {
+   "check": "annotation_calibration_v1_blinded: sheets carry no system/configuration/run column",
+   "ok": true,
+   "detail": "episode id, task and judgement columns only"
+  },
+  {
+   "check": "annotation_calibration_v1_blinded: no judgement pre-filled",
+   "ok": true,
+   "detail": "all judgement cells empty"
+  },
+  {
+   "check": "calibration and sample packets share no episode id",
+   "ok": true,
+   "detail": "disjoint"
+  }
+ ],
+ "directories": [
+  "docs/annotation_sample_v1_blinded",
+  "docs/annotation_calibration_v1_blinded"
+ ],
+ "skipped": [
+  "case/patient separation re-verified from the hidden mapping: mapping not found at docs/annotation_sample_v1/blinding_map_do_not_share.csv / docs/annotation_calibration_v1_map_do_not_share.csv (moved out of the shared tree). Re-run with --sample-map and --calibration-map pointing at the sealed copies to verify."
+ ],
+ "passed": true
+}

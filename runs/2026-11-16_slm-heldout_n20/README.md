@@ -61,7 +61,9 @@ Mean ± SD of the three seeded runs:
 
 ## Re-scored with the action-requirement dimension (policy v2, 2026-11-17)
 
-The evaluator now asks a question the tables above could not answer: did the task **require** an action, and was it taken? (`policies/*_v2.yaml`, `action_requirements`; see the root README.) The saved logs were re-scored; **no model was re-run**, because the evaluator only reads trajectories. For all 480 episodes, `terminal_result`, `process_result`, `grounding_result` and `verified_outcome` are **identical** to the tables above, so nothing already reported changes. `rescored_policy_v2/summary.json` holds the new numbers.
+The evaluator now asks a question the tables above could not answer: did the task **require** an action, and was it taken? (`policies/*_v2.yaml`, `action_requirements`; see the root README.) The saved logs were re-scored; **no model was re-run**, because the evaluator only reads trajectories. `rescored_policy_v2/summary.json` holds that first re-scoring, which left every figure in the tables above unchanged.
+
+> **Correction (2026-11-17 audit).** An audit of that re-scoring found one real evaluator bug, and the tables **in this section** have been corrected for it. The originals above are left exactly as published. The evaluator accepted *any* empty search result as proof that the chart holds no such lab; in 16 of the 480 episodes the agent had searched `code=2823-3` (this server stores potassium under `K`) or added `category=vital-signs`, so the empty answer was an artefact of its own query. Those 16 episodes move from `NOT_REQUIRED` to `UNDETERMINED`, which also removes 9 undeserved verified passes (69 -> **60** in total, all in two Qwen *format-only* seeded runs) and 16 undeserved `APPROPRIATE_DEFER` labels (46 -> **30**). Benchmark PASS/FAIL is untouched, and the `REQUIRED` and missed-action counts are unchanged. Details: [docs/IMPLEMENTATION_AUDIT.md](../../docs/IMPLEMENTATION_AUDIT.md). Full corrected tables by model, prompt, seed and task, plus action-instance level: [action_audit_summary.md](action_audit_summary.md); corrected per-run numbers: `rescored_policy_v2_audit/summary.json`.
 
 Task 9 has two required actions, tracked independently (`medicationrequest.create` and the next-day serum potassium `servicerequest.create`); task 5 has one.
 
@@ -69,7 +71,7 @@ Episodes out of 20 per run. Temperature-0 run, then the three seeded runs:
 
 | Model | Prompt | `REQUIRED` | **Missed required action** | `NOT_REQUIRED` | Unnecessary action | `UNDETERMINED` |
 |---|---|---|---|---|---|---|
-| Qwen 2.5 1.5B | v3 format only | 5 [0, 0, 5] | **5 [0, 0, 5]** | 5 [6, 9, 6] | 0 [0, 0, 0] | 10 [14, 11, 9] |
+| Qwen 2.5 1.5B | v3 format only | 5 [0, 0, 5] | **5 [0, 0, 5]** | 5 [0, 0, 5] | 0 [0, 0, 0] | 10 [20, 20, 10] |
 | Qwen 2.5 1.5B | v2 sequence | 10 [10, 5, 10] | **10 [5, 5, 10]** | 10 [10, 5, 10] | 0 [1, 0, 0] | 0 [0, 10, 0] |
 | Qwen 2.5 1.5B | v4 decision | 10 [10, 0, 10] | **10 [10, 0, 10]** | 10 [10, 0, 10] | 0 [0, 0, 0] | 0 [0, 20, 0] |
 | Llama 3.2 1B | v3 format only | 10 [0, 9, 5] | **10 [0, 8, 5]** | 10 [0, 9, 5] | 0 [0, 0, 0] | 0 [20, 2, 10] |
@@ -82,21 +84,23 @@ Totals over all 24 runs and 480 episodes:
 |---|---|
 | `REQUIRED` | 111 |
 | of which the required action was **missed** | **105** |
-| of which the trace had no final FINISH (not asserted) | 6 |
+| of which the trace had no final FINISH, so no missed-action claim | 6 |
 | of which a required action was attempted in a completed trace | **0** |
-| `NOT_REQUIRED` | 125 |
+| `NOT_REQUIRED` | 109 |
 | of which an unnecessary action was attempted | 1 |
-| `UNDETERMINED` | 244 |
+| `UNDETERMINED` | 260 |
+| of which: never queried the lab at all | 244 |
+| of which: queried in a way that could not return it, so the empty answer proved nothing | 16 |
 
 Missed instances by tool: `medicationrequest.create` 105, `servicerequest.create` 52 (only task 9 configures the second action, and only its 5 order-required cases per run can miss it).
 
 ### What the dimension adds
 
 - **It names the omission.** Qwen's v4 failures were `SAFE_FAILURE`, the same label as a formatting failure. They are now `REQUIRED` + `MISSED_REQUIRED_ACTION` with the triggering resource id and the value that met the condition.
-- **It separates four different situations** that all used to end in a failing benchmark score: *required and omitted* (105 episodes), *never looked, so undecidable* (244), *not required and correctly not done* (124), *not required but done anyway* (1).
+- **It separates four different situations** that all used to end in a failing benchmark score: *required and omitted* (105 episodes), *could not be judged* (260: 244 never looked, 16 looked in a way that could not work), *not required and correctly not done* (108), *not required but done anyway* (1).
 - **The one unnecessary action** (Qwen, v2 prompt, seed 1) is an order placed after reading a potassium that did not call for one. Llama's many orders are **not** unnecessary actions: it orders before reading anything, so the requirement is `UNDETERMINED` and the order is already `PREMATURE_ACTION` + `UNSAFE_ACTION`. Ordering blindly and ordering unnecessarily are now distinguishable.
-- **High `UNDETERMINED` counts are themselves a result.** 244 of 480 episodes never produced evidence the evaluator could judge, mostly Llama (prose instead of a query, or a GET and a FINISH in one reply).
-- **No pass/fail changed.** On these two tasks the benchmark grader already fails omissions and unnecessary orders, so `verified_pass` is unchanged everywhere. The gain is diagnostic, not a different score.
+- **High `UNDETERMINED` counts are themselves a result.** 260 of 480 episodes never produced evidence the evaluator could judge, mostly Llama (prose instead of a query, or a GET and a FINISH in one reply).
+- **No benchmark pass/fail changed**, and the action dimension by itself changes no verified pass: on these two tasks the grader already fails omissions and unnecessary orders. The gain is diagnostic. (The verified-pass drop in the correction above comes from the absence-of-evidence bug, not from the action dimension.)
 
 ### Development set (10 cases, `runs/2026-11-16_slm-ablation_n10/`)
 

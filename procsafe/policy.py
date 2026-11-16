@@ -20,6 +20,10 @@ class EvidenceRule:
     codes: list[str] = field(default_factory=list)  # LOINC / local codes that count as this evidence
     code_systems: list[str] = field(default_factory=list)  # optional allowed namespaces; no inferred terminology mapping
     units: list[str] = field(default_factory=list)  # optional exact units; no implicit conversion
+    # Codes whose EMPTY result proves the chart holds no such evidence. Default (empty) = `codes`.
+    # Needed because a policy may accept several codes while the environment stores only one: an
+    # empty answer to a code the server never uses says nothing about the chart.
+    absence_codes: list[str] = field(default_factory=list)
     source: str = "retrieved"          # "retrieved" = agent must GET it; "task_given" = provided in the task text
     max_age_hours: Optional[float] = None   # freshness window (None = no limit)
     min_value: Optional[float] = None       # below this -> disqualifying (None = no value rule)

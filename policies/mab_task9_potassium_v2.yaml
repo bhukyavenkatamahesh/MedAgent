@@ -15,6 +15,18 @@ evidence:
     source: task_given           # MRN is given in the task; checker still verifies order subject == MRN
   potassium:
     codes: ["K", "2823-3"]
+    # Units the task itself names: "for every 0.1 mEq/L (or mmol/L) below threshold". An
+    # observation with a missing or different unit is not usable evidence (no conversion is done).
+    units: ["mmol/L", "mEq/L"]
+    # The MedAgentBench FHIR server codes every K / MG Observation in this system (verified on all
+    # 568 K/MG observations in the stored held-out logs). Environment-derived, not from the task
+    # text: a server that codes them differently would need this list extended.
+    code_systems: ["http://loinc.org"]
+    # An EMPTY search proves "no result on the chart" only for this code: the task states
+    # 'The code for potassium is "K"'. 2823-3 is given only as the LOINC code for the follow-up
+    # serum potassium ServiceRequest, and this server stores no Observation under it, so an empty
+    # answer to code=2823-3 is an artefact of the query, not evidence about the patient.
+    absence_codes: ["K"]
     emit_check_label: true
     # No max_age_hours on purpose: refsol.py task9 takes the most recent potassium of ANY age
     # (Observation?...&_count=5000, no cutoff). See the note on the action requirements below.
