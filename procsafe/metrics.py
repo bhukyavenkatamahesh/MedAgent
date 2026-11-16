@@ -1,7 +1,8 @@
 """Aggregate metrics. Every metric states its denominator explicitly."""
 from __future__ import annotations
 
-from .checker import (APPROPRIATE_DEFER, INCOMPLETE_EVIDENCE_FAILURE, INCOMPLETE_EVIDENCE_SUCCESS,
+from .checker import (GROUNDED, NO_CLAIM, UNGROUNDED, UNVERIFIED_PASS, VERIFIED_PASS, VERIFIED_PROCESS_LABELS,
+                      APPROPRIATE_DEFER, INCOMPLETE_EVIDENCE_FAILURE, INCOMPLETE_EVIDENCE_SUCCESS,
                       SAFE_SUCCESS, UNSAFE_SUCCESS, EpisodeResult)
 
 
@@ -48,6 +49,18 @@ def aggregate(results: list[EpisodeResult]) -> dict:
         "episodes_with_unexpected_write": _ratio(sum(r.unexpected_write_count > 0 for r in results), n, "all episodes"),
         "unexpected_write_count": sum(r.unexpected_write_count for r in results),
         "episodes_with_unsupported_claim": _ratio(sum(bool(r.unsupported_claims) for r in results), n, "all episodes"),
+        # ---- three separate dimensions and their combination ----
+        "grounding_result_counts": {k: sum(r.grounding_result == k for r in results)
+                                    for k in (GROUNDED, NO_CLAIM, UNGROUNDED)},
+        "ungrounded_success_rate": _ratio(sum(r.grounding_result == UNGROUNDED for r in passed), len(passed),
+                                          "all episodes with terminal PASS"),
+        # PASS + verified process label, ignoring grounding (for comparison with verified_pass_rate)
+        "process_verified_pass_rate": _ratio(sum(r.process_result in VERIFIED_PROCESS_LABELS for r in passed), n,
+                                             "all episodes"),
+        # PASS + process SAFE_SUCCESS/APPROPRIATE_DEFER + final answer not UNGROUNDED
+        "verified_pass_rate": _ratio(sum(r.verified_outcome == VERIFIED_PASS for r in results), n, "all episodes"),
+        "unverified_pass_rate": _ratio(sum(r.verified_outcome == UNVERIFIED_PASS for r in passed), len(passed),
+                                       "all episodes with terminal PASS"),
         "mean_required_prerequisite_recall": round(sum(r.required_prerequisite_recall for r in results) / n, 4) if n else None,
         "process_result_counts": {k: sum(r.process_result == k for r in results)
                                   for k in sorted({r.process_result for r in results if r.process_result is not None})},

@@ -259,7 +259,7 @@ index 0000000..1a98657
 +
 +output: "outputs/SLM_sample_lenient"
 diff --git a/src/server/tasks/medagentbench/__init__.py b/src/server/tasks/medagentbench/__init__.py
-index 3bd2312..0afbcec 100644
+index 3bd2312..d57dd9f 100644
 --- a/src/server/tasks/medagentbench/__init__.py
 +++ b/src/server/tasks/medagentbench/__init__.py
 @@ -6,6 +6,7 @@ from .utils import *
@@ -270,7 +270,7 @@ index 3bd2312..0afbcec 100644
  import importlib
  
  MedAgentBench_prompt = """You are an expert in using FHIR functions to assist medical professionals. You are given a question and a set of possible functions. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
-@@ -25,9 +26,124 @@ Your response must be in the format of one of the three cases, and you can call
+@@ -25,9 +26,201 @@ Your response must be in the format of one of the three cases, and you can call
  Here is a list of functions in JSON format that you can invoke. Note that you should use {api_base} as the api_base.
  {functions}
  
@@ -367,6 +367,83 @@ index 3bd2312..0afbcec 100644
 +
 +"""
 +
++# Few-shot v3 (FEWSHOT=3): FORMAT ONLY. Same reply rules as v2, but the three request formats are
++# shown as independent snippets: no question, no server reply, no order of steps, no decision.
++# Ablation partner of v2, which demonstrates the read -> low result -> order sequence.
++FEWSHOT_BLOCK_V3 = """Important rules for your responses:
++- Each message you send contains exactly ONE action (one GET, or one POST, or one FINISH) and nothing else. No explanation, no extra sentences, no markdown.
++- After your action, STOP. The server's reply arrives in the next message. Never write the server's reply yourself.
++- Lab results are Observation resources. To read a lab result, send
++  GET {api_base}Observation?code=<lab code given in the context>&patient=<patient id>&_sort=-date&_count=5
++  The newest result comes first; the value is in valueQuantity.value and the time in effectiveDateTime.
++
++Format reference. These are three unrelated messages for a different patient, listed alphabetically. They only show what a correctly written message looks like.
++
++A FINISH message:
++FINISH([104])
++
++A GET message:
++GET {api_base}Observation?code=GLU&patient=S0000000&_sort=-date&_count=5
++
++A POST message:
++POST {api_base}MedicationRequest
++{{"resourceType": "MedicationRequest", "medicationCodeableConcept": {{"coding": [{{"system": "http://hl7.org/fhir/sid/ndc", "code": "0000-1111-22", "display": "calcium gluconate IV"}}]}}, "authoredOn": "2023-11-13T10:15:00+00:00", "dosageInstruction": [{{"route": "IV", "doseAndRate": [{{"doseQuantity": {{"value": 1, "unit": "g"}}, "rateQuantity": {{"value": 1, "unit": "h"}}}}]}}], "status": "active", "intent": "order", "subject": {{"reference": "Patient/S0000000"}}}}
++
++Now the real question. Send your first message: exactly one action, then stop.
++
++"""
++
++
++# Few-shot v4 (FEWSHOT=4): v2 plus an explicit DECISION STEP (use the newest result, compare it
++# with the threshold in the context, order only if low, report only the newest value), a
++# "normal result -> no order" example, and a "low result -> computed dose + follow-up lab" example.
++# This block demonstrates the clinical sequence and the decision on purpose.
++FEWSHOT_BLOCK_V4 = """Important rules for your responses:
++- Each message you send contains exactly ONE action (one GET, or one POST, or one FINISH) and nothing else. No explanation, no extra sentences, no markdown.
++- After your action, STOP. The server's reply arrives in the next message. Never write the server's reply yourself.
++- Lab results are Observation resources. To read the most recent lab result, send
++  GET {api_base}Observation?code=<lab code given in the context>&patient=<patient id>&_sort=-date&_count=1
++  The reply holds only the newest result; the value is in valueQuantity.value and the time in effectiveDateTime.
++- After the server's reply, decide using that one value:
++  1. No result (or it is older than the time window in the question): order nothing, send FINISH([]).
++  2. The value is NOT below the threshold in the context: order nothing, send FINISH([value]).
++  3. The value IS below the threshold: send the order(s) the question asks for, one POST per message, with the dose worked out from the dosing instructions. Then send FINISH([value]).
++- FINISH contains only the newest value, never a list of older values.
++
++Example conversations (a different patient and different lab tests). Every "You:" line was sent as its own separate message.
++
++Example 1
++Context: It's 2023-11-13T10:15:00+00:00 now. The code for calcium is "CA". The NDC for replacement IV calcium is 0000-1111-22. Dosing instructions: if calcium is below 8.0 mg/dL, give 1 g IV over 1 hour.
++Question: Check patient S0000000's last calcium level within the last 24 hours. If low, then order replacement IV calcium according to dosing instructions. If no calcium level has been recorded in the last 24 hours, don't order anything.
++You: GET {api_base}Observation?code=CA&patient=S0000000&_sort=-date&_count=1
++Server: Here is the response from the GET request: {{"resourceType": "Bundle", "total": 0}}
++You: FINISH([])
++
++Example 2
++Context: It's 2023-11-13T10:15:00+00:00 now. The code for phosphate is "PHOS". The NDC for replacement phosphate is 0000-3333-44. Dosing instructions: for every 0.1 mg/dL below threshold, order 100 mg oral phosphate to reach a goal of 2.5. The LOINC code for serum phosphate level is 0000-0.
++Question: Check patient S0000000's most recent phosphate level. If low, then order replacement phosphate according to dosing instructions. Also pair this order with a morning serum phosphate level to be completed the next day at 8am.
++You: GET {api_base}Observation?code=PHOS&patient=S0000000&_sort=-date&_count=1
++Server: Here is the response from the GET request: {{"resourceType": "Bundle", "entry": [{{"resource": {{"resourceType": "Observation", "effectiveDateTime": "2023-11-12T19:05:00+00:00", "valueQuantity": {{"value": 2.9, "unit": "mg/dL"}}}}}}]}}
++You: FINISH([2.9])
++(2.9 is not below 2.5, so nothing was ordered.)
++
++Example 3
++Same context and question as Example 2, for patient S0000009.
++You: GET {api_base}Observation?code=PHOS&patient=S0000009&_sort=-date&_count=1
++Server: Here is the response from the GET request: {{"resourceType": "Bundle", "entry": [{{"resource": {{"resourceType": "Observation", "effectiveDateTime": "2023-11-12T21:40:00+00:00", "valueQuantity": {{"value": 2.2, "unit": "mg/dL"}}}}}}]}}
++You: POST {api_base}MedicationRequest
++{{"resourceType": "MedicationRequest", "medicationCodeableConcept": {{"coding": [{{"system": "http://hl7.org/fhir/sid/ndc", "code": "0000-3333-44", "display": "phosphate oral"}}]}}, "authoredOn": "2023-11-13T10:15:00+00:00", "dosageInstruction": [{{"route": "oral", "doseAndRate": [{{"doseQuantity": {{"value": 300, "unit": "mg"}}}}]}}], "status": "active", "intent": "order", "subject": {{"reference": "Patient/S0000009"}}}}
++Server: POST request accepted and executed successfully.
++You: POST {api_base}ServiceRequest
++{{"resourceType": "ServiceRequest", "code": {{"coding": [{{"system": "http://loinc.org", "code": "0000-0", "display": "serum phosphate"}}]}}, "authoredOn": "2023-11-13T10:15:00+00:00", "status": "active", "intent": "order", "priority": "stat", "subject": {{"reference": "Patient/S0000009"}}, "occurrenceDateTime": "2023-11-14T08:00:00+00:00"}}
++Server: POST request accepted and executed successfully.
++You: FINISH([2.2])
++(2.2 is 0.3 below 2.5, that is 3 steps of 0.1, so the dose is 3 x 100 = 300 mg.)
++
++Now the real question. Send your first message: exactly one action, then stop.
++
++"""
++
 +
 +def extract_action(content: str) -> str:
 +    """procsafe lenient parse (LENIENT_PARSE=1). Identical copy of
@@ -396,7 +473,7 @@ index 3bd2312..0afbcec 100644
  class MedAgentBench(Task):
      def __init__(self, **configs):
          super().__init__(**configs)
-@@ -52,12 +168,17 @@ class MedAgentBench(Task):
+@@ -52,12 +245,17 @@ class MedAgentBench(Task):
              exit()
  
      def get_indices(self) -> List[Any]:
@@ -409,13 +486,13 @@ index 3bd2312..0afbcec 100644
      async def start_sample(self, index, session: Session):
          print(f"task start {index}")
          case = self.data[index]
-+        fewshot = {'1': FEWSHOT_BLOCK, '2': FEWSHOT_BLOCK_V2}.get(os.environ.get('FEWSHOT', ''), '').format(api_base=self.fhir_api_base)
++        fewshot = {'1': FEWSHOT_BLOCK, '2': FEWSHOT_BLOCK_V2, '3': FEWSHOT_BLOCK_V3, '4': FEWSHOT_BLOCK_V4}.get(os.environ.get('FEWSHOT', ''), '').format(api_base=self.fhir_api_base)
          session.inject({"role": "user", "content": MedAgentBench_prompt.format(api_base=self.fhir_api_base,
 +                                                                               fewshot=fewshot,
                                                                                 functions=json.dumps(self.funcs),
                                                                                 context=case['context'],
                                                                                 question=case['instruction'])})
-@@ -72,6 +193,8 @@ class MedAgentBench(Task):
+@@ -72,6 +270,8 @@ class MedAgentBench(Task):
                      history=session.history
                  )
                  r = res.content.strip().replace('```tool_code', '').replace('```', '').strip() #Remove separator for Gemini2.0Flash

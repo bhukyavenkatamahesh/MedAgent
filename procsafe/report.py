@@ -23,6 +23,8 @@ def episode_table(r: EpisodeResult) -> str:
                      f"| {'; '.join(t.labels)} | {'; '.join(t.reasons) or ''} |")
     lines.append("")
     lines.append(f"terminal = **{r.terminal_result or 'unknown'}**, process = **{r.process_result or 'unclassified'}**, "
+                 f"grounding = **{r.grounding_result or 'n/a'}**, verified outcome = **{r.verified_outcome or 'unknown'}**"
+                 + (f" ({'; '.join(r.verification_failures)})" if r.verification_failures else "") + ", "
                  f"prereq recall = {r.required_prerequisite_recall:.3f}, premature = {r.premature_action_count}, "
                  f"unsafe = {r.unsafe_action_count}, unexpected writes = {r.unexpected_write_count}"
                  + (f", unsupported claims = {', '.join(f'{v:g}' for v in r.unsupported_claims)}"

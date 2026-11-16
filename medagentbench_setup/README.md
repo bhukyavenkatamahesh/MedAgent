@@ -32,8 +32,11 @@ Environment variables read by the task worker (set them when starting `src.start
 - `SAMPLE_N` (default 5): runs the first N task9 + first N task5 cases. To run everything, revert `get_indices()` to `list(range(len(self.data)))`.
 - `LENIENT_PARSE=1`: takes the first `GET` / `POST` / `FINISH(` line out of a reply that wraps it in prose. It's off by default (strict = original benchmark). Score lenient runs with `scripts/run_medagentbench.py --lenient`, which uses an identical copy of the extraction function.
 
-- `FEWSHOT=1` or `FEWSHOT=2`: adds a few-shot block to the prompt (v1: bracketed narration; v2: `You:` / `Server:` transcript plus "one action, then stop"). The block teaches reply format and valid FHIR requests with a fictional patient and labs. It contains no safety instructions. Unset = original prompt.
+- `FEWSHOT=1..4`: adds a few-shot block to the prompt. Unset = original prompt. All blocks use a fictional patient and labs.
+  - `1` (v1) and `2` (v2): reply rules + full example conversations. They contain no explicit safety instruction, but they **demonstrate the clinical sequence** (read lab → low → order).
+  - `3` (v3): **format only**. The same reply rules + three unrelated one-line format samples, with no sequence and no decision.
+  - `4` (v4): v2 + an explicit **decision step** (newest result, compare with the threshold, order only if low, report only the newest value).
 
 For the 8192-token agents, copy any `slm_*.yaml` assignment and replace the agent name with `llama3.2-1b-ctx8k` or `qwen2.5-1.5b-ctx8k`.
 
-Results: `runs/2026-11-16_slm-1b_sample_n10/` (4 models, base prompt) and `runs/2026-11-16_slm-fewshot_n10/` (base vs few-shot).
+Results: `runs/2026-11-16_slm-1b_sample_n10/` (4 models, base prompt), `runs/2026-11-16_slm-fewshot_n10/` (base vs few-shot) and `runs/2026-11-16_slm-ablation_n10/` (format-only vs clinical sequence vs decision step).
