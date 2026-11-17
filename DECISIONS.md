@@ -540,3 +540,38 @@ Report: `outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md`. Artefact
 - README updated with the current milestone, the v1 result summary, the open blocker and links to
   the planning documents. No evaluator code, policy, human annotation or v1 output was modified.
 
+## 2026-11-17 (j): E0 grader audit and E1 scripted null agents
+
+First two mandatory experiments of the approved plan, both with **no model inference**.
+Reports: `runs/E0_grader_audit/README.md`, `runs/E1_null_agents/README.md`.
+
+- **E0.** Pinned the reference grader by hash (`refsol.py`, 350 lines, sha256 `67d19da2…`).
+  MedAgentBench ships no `refsol.py` in its public repository (verified with `git ls-files`), so
+  there is no public copy to diff against; the grader is pinned and audited by reading its logic,
+  with line numbers cited. Classified all **90** check-then-order cases from the FHIR server:
+  **20 order-needed, 70 not** (task5 2/30, task9 1/30, **task10 17/30**).
+- **E1.** Two scripted agents (`scripts/e1_null_agent_server.py`, served over the Ollama chat API so
+  the real harness and grader run end to end): N0 replies `FINISH([])` only; N1 posts one fixed order
+  built from the task text. The log records 272 replies and **0 GETs**.
+  - N0 passes **70/90**, N1 passes **19/90**, disjoint: **89 of 90 cases are passable with no
+    retrieval at all.** Only `task9_3` resists (continuous dose function).
+  - Per-case agreement with E0's predictions: N0 90/90, N1 88/90.
+  - **The two-case correction matters:** N1 also passes `task5_21` (Mg 1.8) and `task5_25` (Mg 1.9),
+    because task 5's dose is a *band* (1.5-1.9 -> 1 g) and the blind default dose lands inside it.
+    "Payload derived from the value" is therefore not the protection it appears to be; only task 9
+    actually forces retrieval. E0 could not see this from code reading alone.
+  - **Checker sensitivity: 59 of 59** evidence-free terminal passes on tasks 5 and 9 are flagged
+    `UNVERIFIED_PASS`, with 57 as `INCOMPLETE_EVIDENCE_SUCCESS` ("never looked") and 2 as
+    `UNSAFE_SUCCESS` ("ordered without looking"). Zero false negatives. Specificity is untested here
+    by construction and belongs to E4.
+- **Consequences for the plan, applied to the docs:**
+  1. A **task-10 policy** becomes the highest-priority evaluator item (backlog E8): task 10 is the
+     only task type with natural positive-action cases, and its 17 blind passes are the only
+     evidence-free passes the checker currently cannot label.
+  2. The `heldout_v2` "no natural positives" blocker is **lifted** by including task 10; audit
+     decision D2 ("two task types only") is withdrawn, matching the guide's own decision.
+  3. Fine-tuning is demoted in `FINAL_EXPERIMENT_MATRIX_PROPOSAL.md` and the research plan to
+     conditional/optional under the master report's six gates, with A0/A1 (baseline and prompt-only
+     on the locked set) as the mandatory E2 arms.
+- Nothing about the evaluator, the policies or the frozen v1 outputs was changed. 267 tests pass.
+

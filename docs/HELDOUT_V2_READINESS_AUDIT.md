@@ -11,7 +11,14 @@ local FHIR server (container `great_burnell`), with no model inference.
 
 ## 1. Findings that change the design
 
-### 1.1 BLOCKER — the remaining natural pool contains **zero** order-required cases
+> **Superseded in part by E0/E1 (2026-11-17).** Adding **task 10** removes this blocker: task 10
+> has **17 naturally order-required cases of 30** (13 patients with no A1C on record, 4 whose last
+> A1C is from 2022). A locked test set that includes task 10 therefore needs **no synthetic positive
+> cases at all**, and recommendation D2 ("two task types only") is withdrawn in favour of the guide's
+> decision to add task 10. See `runs/E0_grader_audit/` and `runs/E1_null_agents/`. The section below
+> remains accurate for tasks 5 and 9 alone.
+
+### 1.1 BLOCKER (tasks 5 and 9 only) — their remaining natural pool contains **zero** order-required cases
 
 The design assumed "mostly synthetic" positives. It is worse than that: **every** positive-action
 case in `heldout_v2` must be synthetic.
@@ -87,8 +94,8 @@ are untouched) at the cost of a new policy plus its own review.
 
 | # | Decision |
 |---|---|
-| D1 | Synthetic positives are now unavoidable. Approve the review route, and name the reviewer |
-| D2 | Target size: 26–27 cases from the two existing task types, or extend to a third task type (new policy, new review) |
+| D1 | **Revised after E0:** synthetic positives are no longer unavoidable if task 10 is included (17 natural positives). Approve task 10, and decide whether any synthetic cases are still wanted for the edge scenarios |
+| D2 | **Withdrawn:** the recommendation to stay with two task types. Task 10 is the only source of natural positive-action cases in the benchmark |
 | D3 | Strict patient-level separation (26 cases) or index-level only (30, with the overlap documented) |
 | D4 | Accept the per-case-seed harness change as a prerequisite, or run with run-level seeds and report the correlation as a limitation |
 | D5 | Lock the evaluator before v2 at the current version, or first land guide v2 and backlog items E1–E3 |

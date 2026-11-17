@@ -1,5 +1,13 @@
 # Proposal: final experimental matrix
 
+> **Correction 2026-11-17:** this matrix was written with the fine-tuned-vs-prompt comparison as the
+> goal. The approved thesis direction is **evaluator-first**: fine-tuning is *conditional and
+> optional*, gated behind the six conditions in the master report §13, and reported as a stress test
+> of the benchmark rather than the contribution. Arms **A0/A1** (baseline and prompt-only on the
+> locked set) are the mandatory E2 experiment; **A2/A3** run only if the gates are met. E0 and E1 are
+> now done (`runs/E0_grader_audit/`, `runs/E1_null_agents/`) and the locked set should include
+> **task 10**.
+
 **Status: PROPOSAL. Nothing here is run.** It needs the `heldout_v2` prerequisites
 (`docs/HELDOUT_V2_READINESS_AUDIT.md`) and supervisor sign-off first. Runtime estimates come from
 measured `heldout_v1` runs (~4 min per 20-case run on this laptop).

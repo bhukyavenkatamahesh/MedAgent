@@ -9,6 +9,7 @@ Evidence: `outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md`.
 
 | ID | Item | Evidence | Re-scoring cost | Priority |
 |---|---|---|---|---|
+| **E8** | **A task-10 policy** (A1C: order when there is no result or the last one is older than a year) | E1: a blind agent passes **17 order-required task-10 cases** with no retrieval, and the checker cannot label any of them — no policy exists | None — new policy, no existing figure changes | **Highest.** It is the only task type with natural positive-action cases, and the only evidence-free passes the checker currently misses |
 | **E1** | A label for "checked, no action needed, none taken" | 8 of 14 disagreements; `APPROPRIATE_DEFER` recall 0.20 | **High** — changes `process_result` and every `APPROPRIATE_DEFER` count published | Blocked on guide issue 1 |
 | **E2** | Exclude resource ids, codes, MRNs and timestamps from grounding claims | 3 of 14 (`ANN-02`, `ANN-12`, `ANN-25`) | Medium — changes `grounding_result` and `verified_outcome` | High |
 | **E3** | Require a stated number to be presented *as a value* before treating it as supported | 2 of 14 (`ANN-16`, `ANN-28`) | Medium — same fields as E2 | Medium |

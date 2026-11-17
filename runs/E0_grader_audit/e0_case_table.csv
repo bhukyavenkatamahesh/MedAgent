@@ -1,0 +1,91 @@
+index,case_id,task,mrn,lab,window,latest_value,latest_time,order_needed,posts_required_if_order,payload_depends_on_value,N0_finish_only_passes,N1_blind_order_passes
+120,task5_1,task5,S6315806,MG,24h,,,False,1,True,True,False
+121,task5_2,task5,S6541353,MG,24h,,,False,1,True,True,False
+122,task5_3,task5,S0636132,MG,24h,2.0,2023-11-13T00:36:00+00:00,False,1,True,True,False
+123,task5_4,task5,S6468480,MG,24h,,,False,1,True,True,False
+124,task5_5,task5,S6530813,MG,24h,,,False,1,True,True,False
+125,task5_6,task5,S2075210,MG,24h,2.1,2023-11-13T02:16:00+00:00,False,1,True,True,False
+126,task5_7,task5,S0581164,MG,24h,2.1,2023-11-12T12:58:00+00:00,False,1,True,True,False
+127,task5_8,task5,S1891852,MG,24h,,,False,1,True,True,False
+128,task5_9,task5,S3195056,MG,24h,,,False,1,True,True,False
+129,task5_10,task5,S2874099,MG,24h,2.0,2023-11-12T12:50:00+00:00,False,1,True,True,False
+130,task5_11,task5,S6537563,MG,24h,2.1,2023-11-13T04:24:00+00:00,False,1,True,True,False
+131,task5_12,task5,S2016972,MG,24h,,,False,1,True,True,False
+132,task5_13,task5,S6521727,MG,24h,,,False,1,True,True,False
+133,task5_14,task5,S0658561,MG,24h,2.1,2023-11-12T12:50:00+00:00,False,1,True,True,False
+134,task5_15,task5,S1733937,MG,24h,,,False,1,True,True,False
+135,task5_16,task5,S1023381,MG,24h,2.0,2023-11-12T13:31:00+00:00,False,1,True,True,False
+136,task5_17,task5,S6192632,MG,24h,2.3,2023-11-12T14:18:00+00:00,False,1,True,True,False
+137,task5_18,task5,S6534835,MG,24h,2.0,2023-11-12T15:27:00+00:00,False,1,True,True,False
+138,task5_19,task5,S3057899,MG,24h,2.2,2023-11-12T23:31:00+00:00,False,1,True,True,False
+139,task5_20,task5,S1715871,MG,24h,,,False,1,True,True,False
+140,task5_21,task5,S3084624,MG,24h,1.8,2023-11-13T06:40:00+00:00,True,1,True,False,False
+141,task5_22,task5,S1698248,MG,24h,,,False,1,True,True,False
+142,task5_23,task5,S2402518,MG,24h,,,False,1,True,True,False
+143,task5_24,task5,S6549951,MG,24h,,,False,1,True,True,False
+144,task5_25,task5,S6542579,MG,24h,1.9,2023-11-13T04:51:00+00:00,True,1,True,False,False
+145,task5_26,task5,S1478444,MG,24h,,,False,1,True,True,False
+146,task5_27,task5,S6547257,MG,24h,2.7,2023-11-12T13:35:00+00:00,False,1,True,True,False
+147,task5_28,task5,S2703270,MG,24h,2.0,2023-11-12T14:29:00+00:00,False,1,True,True,False
+148,task5_29,task5,S2937751,MG,24h,,,False,1,True,True,False
+149,task5_30,task5,S6484983,MG,24h,,,False,1,True,True,False
+240,task9_1,task9,S3241217,K,any age,3.9,2023-11-12T20:36:00+00:00,False,2,True,True,False
+241,task9_2,task9,S1023381,K,any age,3.8,2023-11-12T13:31:00+00:00,False,2,True,True,False
+242,task9_3,task9,S6550627,K,any age,3.1,2023-11-12T14:52:00+00:00,True,2,True,False,False
+243,task9_4,task9,S1374652,K,any age,4.2,2023-11-12T11:48:00+00:00,False,2,True,True,False
+244,task9_5,task9,S1796597,K,any age,5.1,2023-11-12T23:41:00+00:00,False,2,True,True,False
+245,task9_6,task9,S6550473,K,any age,4.3,2023-11-12T14:09:00+00:00,False,2,True,True,False
+246,task9_7,task9,S6268253,K,any age,5.4,2023-11-12T13:35:00+00:00,False,2,True,True,False
+247,task9_8,task9,S1635224,K,any age,3.8,2023-11-12T15:12:00+00:00,False,2,True,True,False
+248,task9_9,task9,S6309742,K,any age,3.8,2023-11-12T12:23:00+00:00,False,2,True,True,False
+249,task9_10,task9,S3084624,K,any age,4.0,2023-11-13T06:40:00+00:00,False,2,True,True,False
+250,task9_11,task9,S3213957,K,any age,3.9,2023-11-12T13:52:00+00:00,False,2,True,True,False
+251,task9_12,task9,S6541353,K,any age,4.0,2023-11-13T01:41:00+00:00,False,2,True,True,False
+252,task9_13,task9,S3057899,K,any age,4.5,2023-11-12T23:31:00+00:00,False,2,True,True,False
+253,task9_14,task9,S6547257,K,any age,3.7,2023-11-13T04:36:00+00:00,False,2,True,True,False
+254,task9_15,task9,S0722219,K,any age,3.9,2023-11-13T07:35:00+00:00,False,2,True,True,False
+255,task9_16,task9,S2823623,K,any age,4.1,2023-11-13T03:35:00+00:00,False,2,True,True,False
+256,task9_17,task9,S6537563,K,any age,4.5,2023-11-12T13:09:00+00:00,False,2,True,True,False
+257,task9_18,task9,S2450227,K,any age,3.6,2023-11-12T14:39:00+00:00,False,2,True,True,False
+258,task9_19,task9,S6329254,K,any age,3.5,2023-11-13T05:17:00+00:00,False,2,True,True,False
+259,task9_20,task9,S3236936,K,any age,3.8,2023-11-13T01:19:00+00:00,False,2,True,True,False
+260,task9_21,task9,S6426560,K,any age,4.6,2023-11-12T13:04:00+00:00,False,2,True,True,False
+261,task9_22,task9,S6474456,K,any age,3.9,2023-11-12T14:07:00+00:00,False,2,True,True,False
+262,task9_23,task9,S0869531,K,any age,4.3,2023-11-13T01:37:00+00:00,False,2,True,True,False
+263,task9_24,task9,S2090974,K,any age,4.3,2023-11-13T04:55:00+00:00,False,2,True,True,False
+264,task9_25,task9,S2704870,K,any age,4.1,2023-11-13T04:00:00+00:00,False,2,True,True,False
+265,task9_26,task9,S6352985,K,any age,4.1,2023-11-13T04:55:00+00:00,False,2,True,True,False
+266,task9_27,task9,S1311412,K,any age,3.5,2023-11-12T12:59:00+00:00,False,2,True,True,False
+267,task9_28,task9,S3228213,K,any age,4.7,2023-11-12T19:13:00+00:00,False,2,True,True,False
+268,task9_29,task9,S6500497,K,any age,3.6,2023-11-13T01:25:00+00:00,False,2,True,True,False
+269,task9_30,task9,S6545016,K,any age,3.8,2023-11-13T05:58:00+00:00,False,2,True,True,False
+270,task10_1,task10,S6227720,A1C,any age,,,True,1,False,False,True
+271,task10_2,task10,S1635224,A1C,any age,5.9,2023-11-09T03:05:00+00:00,False,1,False,True,False
+272,task10_3,task10,S6474456,A1C,any age,,,True,1,False,False,True
+273,task10_4,task10,S2161163,A1C,any age,5.4,2023-08-01T20:29:00+00:00,False,1,False,True,False
+274,task10_5,task10,S0547588,A1C,any age,6.6,2023-11-04T14:54:00+00:00,False,1,False,True,False
+275,task10_6,task10,S2111822,A1C,any age,,,True,1,False,False,True
+276,task10_7,task10,S1891852,A1C,any age,,,True,1,False,False,True
+277,task10_8,task10,S3114648,A1C,any age,6.1,2023-10-13T22:22:00+00:00,False,1,False,True,False
+278,task10_9,task10,S1698248,A1C,any age,5.5,2023-10-14T18:44:00+00:00,False,1,False,True,False
+279,task10_10,task10,S6488980,A1C,any age,,,True,1,False,False,True
+280,task10_11,task10,S2033286,A1C,any age,,,True,1,False,False,True
+281,task10_12,task10,S6550627,A1C,any age,,,True,1,False,False,True
+282,task10_13,task10,S6521727,A1C,any age,5.8,2022-09-09T15:33:00+00:00,True,1,False,False,True
+283,task10_14,task10,S6541609,A1C,any age,4.8,2022-05-18T22:03:00+00:00,True,1,False,False,True
+284,task10_15,task10,S6545016,A1C,any age,5.7,2023-07-07T11:27:00+00:00,False,1,False,True,False
+285,task10_16,task10,S2016972,A1C,any age,,,True,1,False,False,True
+286,task10_17,task10,S2823623,A1C,any age,5.0,2023-11-09T10:06:00+00:00,False,1,False,True,False
+287,task10_18,task10,S1311412,A1C,any age,5.9,2023-11-12T06:19:00+00:00,False,1,False,True,False
+288,task10_19,task10,S2154941,A1C,any age,5.9,2023-09-22T22:28:00+00:00,False,1,False,True,False
+289,task10_20,task10,S0722219,A1C,any age,6.5,2022-03-08T08:14:00+00:00,True,1,False,False,True
+290,task10_21,task10,S0789363,A1C,any age,,,True,1,False,False,True
+291,task10_22,task10,S2090974,A1C,any age,,,True,1,False,False,True
+292,task10_23,task10,S3070524,A1C,any age,,,True,1,False,False,True
+293,task10_24,task10,S6500497,A1C,any age,5.2,2022-08-09T15:33:00+00:00,True,1,False,False,True
+294,task10_25,task10,S1152319,A1C,any age,,,True,1,False,False,True
+295,task10_26,task10,S6352985,A1C,any age,,,True,1,False,False,True
+296,task10_27,task10,S0658561,A1C,any age,5.4,2023-11-02T06:53:00+00:00,False,1,False,True,False
+297,task10_28,task10,S6530532,A1C,any age,7.4,2023-06-27T23:25:00+00:00,False,1,False,True,False
+298,task10_29,task10,S2703270,A1C,any age,6.2,2023-11-09T00:17:00+00:00,False,1,False,True,False
+299,task10_30,task10,S1876702,A1C,any age,8.3,2023-10-30T13:10:00+00:00,False,1,False,True,False

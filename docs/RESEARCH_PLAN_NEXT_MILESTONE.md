@@ -10,6 +10,16 @@ documents it refers to are proposals and audits, not changes:
 | `docs/HELDOUT_V2_READINESS_AUDIT.md` | what is missing before a defensible final test set |
 | `docs/FINAL_EXPERIMENT_MATRIX_PROPOSAL.md` | the baseline / prompt-only / improved matrix |
 
+> **Update 2026-11-17 (evening): E0 and E1 are done**, and they change this plan. See
+> `runs/E0_grader_audit/` and `runs/E1_null_agents/`. Headline: **89 of 90 benchmark cases can be
+> passed by a scripted agent that never retrieves anything**, and the checker flags **59 of 59** such
+> passes on the task types where a policy exists. Task 10 turns out to hold **17 natural
+> order-required cases**, which removes the synthetic-positives blocker. The plan below is kept as
+> written for the record; the live sequence is now the master report's E0 → E1 → evaluator fixes
+> (including a **task-10 policy**) → E4 → lock → E2, with fine-tuning conditional under its six gates
+> rather than the milestone. The fine-tuning framing in §3 and in
+> `FINAL_EXPERIMENT_MATRIX_PROPOSAL.md` is demoted accordingly.
+
 ## 1. Where the project stands
 
 - The evaluator measures process safety on four dimensions and has survived an independent audit

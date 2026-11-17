@@ -123,6 +123,27 @@ Real benchmark-agent runs done so far, all on a local MedAgentBench + FHIR serve
 | Prompt ablation (format-only vs clinical sequence vs decision step) | Llama 3.2 1B, Qwen 2.5 1.5B | same 10 | `runs/2026-11-16_slm-ablation_n10/` |
 | Held-out, balanced, repeated (4 runs per condition) | Llama 3.2 1B, Qwen 2.5 1.5B | 20 held-out: 10 order-required, 10 no-order | `runs/2026-11-16_slm-heldout_n20/` |
 
+### Headline result (E0 + E1, deterministic, no model inference)
+
+**A terminal PASS on this benchmark does not imply the agent received the evidence the task
+requires.** Two scripted agents with no language model, run through the unmodified harness and the
+real reference grader:
+
+| Scripted agent | Retrieval | Cases passed (of 90) |
+|---|---|---|
+| **N0** — `FINISH([])` only | no GET, no POST | **70** |
+| **N1** — one blind fixed order from the task text | no GET | **19** (incl. **17 order-required** task-10 cases) |
+
+**89 of 90 cases are passable with zero retrieval.** Only `task9_3` resists, because task 9's dose is
+a continuous function of the potassium value. On the task types where a policy exists, the checker
+flags **59 of 59** of those evidence-free passes as `UNVERIFIED_PASS` — no false negatives — and
+separates "never looked" (`INCOMPLETE_EVIDENCE_SUCCESS`, 57) from "ordered without looking"
+(`UNSAFE_SUCCESS`, 2), a distinction the grader's single PASS cannot make.
+
+Details: [E0 grader audit](runs/E0_grader_audit/README.md) · [E1 null agents](runs/E1_null_agents/README.md).
+Grader pinned at sha256 `67d19da2…`; MedAgentBench ships no public `refsol.py`, so it is pinned by
+hash rather than diffed.
+
 ### Current milestone
 
 | Milestone | State |
@@ -130,7 +151,9 @@ Real benchmark-agent runs done so far, all on a local MedAgentBench + FHIR serve
 | Evaluator: process safety, grounding, action requirements | built; independently audited 2026-11-17 (3 bugs found and fixed) — [audit](docs/IMPLEMENTATION_AUDIT.md) |
 | Human validation v1 (30 episodes, 2 reviewers, adjudicated) | **complete and frozen** — [report](outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md), [freeze manifest](outputs/human_validation_v1/FROZEN_v1_MANIFEST.md) |
 | Guide v2, evaluator improvements, `heldout_v2`, final experiment | **proposed, awaiting supervisor decisions** — [research plan](docs/RESEARCH_PLAN_NEXT_MILESTONE.md) |
-| Fine-tuning vs prompt-only on a locked test set | not started; blocked on `heldout_v2` |
+| E0 grader audit + E1 scripted null agents | **done 2026-11-17**, deterministic, no model inference |
+| Task-10 policy (the only task type with natural order-required cases: 17 of 30) | next evaluator item |
+| Fine-tuning | **conditional and optional**, gated behind the master report's six conditions; reported as a stress test of the benchmark, never as the contribution |
 
 **Human validation v1 results** (benchmark-compliance annotation, *not* clinical validation):
 reviewer-vs-reviewer 97.0% of 300 cells (per-field Cohen's κ 0.714–1.000, one undefined);
@@ -139,9 +162,15 @@ both attempt fields, premature and unsafe actions; 96.7% missed required action;
 73.3% appropriate deferral. The last two gaps are a definitional mismatch and a numeric-grounding
 limit, both documented and both now proposed for fix.
 
-**Open blocker for the final test set:** every remaining potassium/magnesium case in the benchmark is
-a *negative* (no order required), so all positive-action cases in `heldout_v2` must be synthetic and
-clinical review becomes a prerequisite — see the [readiness audit](docs/HELDOUT_V2_READINESS_AUDIT.md).
+**Test-set blocker, now resolved by E0:** tasks 5 and 9 have no natural order-required cases left, but
+**task 10 has 17 of 30** (13 patients with no A1C, 4 whose last A1C is from 2022). A locked test set
+including task 10 needs no synthetic positive cases, so clinical review is no longer a hard
+prerequisite — see the [readiness audit](docs/HELDOUT_V2_READINESS_AUDIT.md).
+
+**Direction:** evaluator-first. The contribution is the process-safety benchmark, not a better agent;
+the approved title is *A Process-Aware Safety Benchmark for On-Device Small Language Model Agents in
+Clinical Workflows*. Mandatory order: E0 → E1 → evaluator fixes incl. the task-10 policy → E4
+independent human validation → lock → E2 small models on the locked set.
 
 ### Dataset roles (set 2026-11-17)
 

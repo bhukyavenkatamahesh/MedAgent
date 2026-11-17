@@ -1,8 +1,8 @@
 diff --git a/configs/agents/api_agents.yaml b/configs/agents/api_agents.yaml
-index 7df2d6e..26ad1f8 100644
+index 7df2d6e..56522f3 100644
 --- a/configs/agents/api_agents.yaml
 +++ b/configs/agents/api_agents.yaml
-@@ -75,4 +75,120 @@ mistral:
+@@ -75,4 +75,136 @@ mistral:
  claude3.5:
      import: "./claude-chat.yaml"
      parameters:
@@ -125,6 +125,22 @@ index 7df2d6e..26ad1f8 100644
 +                temperature: 0.7
 +                seed: 3
 +
++# ---- E1 scripted null agents (no language model; served by scripts/e1_null_agent_server.py) ----
++null-n0:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "null-n0"
++        url: http://localhost:11501/api/chat
++        body:
++            model: "scripted-null-n0"
++
++null-n1:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "null-n1"
++        url: http://localhost:11502/api/chat
++        body:
++            model: "scripted-null-n1"
 diff --git a/configs/assignments/default.yaml b/configs/assignments/default.yaml
 index ebeae42..de939cd 100644
 --- a/configs/assignments/default.yaml
@@ -152,6 +168,48 @@ index ebeae42..de939cd 100644
  #      - gemini-2.0
  #      - llama-3.3
  #      - gpt-4o
+diff --git a/configs/assignments/e1_null-n0.yaml b/configs/assignments/e1_null-n0.yaml
+new file mode 100644
+index 0000000..6536873
+--- /dev/null
++++ b/configs/assignments/e1_null-n0.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 4
++  agent:
++    null-n0: 4
++
++assignments:
++  - agent:
++      - null-n0
++    task:
++      - medagentbench-std
++
++output: "outputs/E1_null"
+diff --git a/configs/assignments/e1_null-n1.yaml b/configs/assignments/e1_null-n1.yaml
+new file mode 100644
+index 0000000..11dfeb1
+--- /dev/null
++++ b/configs/assignments/e1_null-n1.yaml
+@@ -0,0 +1,15 @@
++import: definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 4
++  agent:
++    null-n1: 4
++
++assignments:
++  - agent:
++      - null-n1
++    task:
++      - medagentbench-std
++
++output: "outputs/E1_null"
 diff --git a/configs/assignments/slm_gemma3-1b-local.yaml b/configs/assignments/slm_gemma3-1b-local.yaml
 new file mode 100644
 index 0000000..35fe5dd

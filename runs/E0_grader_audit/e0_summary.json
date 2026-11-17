@@ -1,0 +1,69 @@
+{
+ "provenance": {
+  "refsol_path": "/Users/venkatamahesh/Desktop/MedAgentBench/MedAgentBench/src/server/tasks/medagentbench/refsol.py",
+  "refsol_sha256": "67d19da263ac92c1b7075b3218ace3a4bd19b206a06fc7aebcc897dc39625419",
+  "refsol_lines": 351,
+  "refsol_in_public_git": false,
+  "refsol_note": "MedAgentBench does not ship refsol.py in its GitHub repository (verified with `git ls-files --error-unmatch`), so there is no public copy to diff against. The grader is therefore pinned by hash and audited by reading its logic.",
+  "test_data_sha256": "b6e89b2ef82f1bef27c5778a644a8a66c7b25738bbd6a48d03ab3e5182df6ca8",
+  "reference_time": "2023-11-13T10:15:00+00:00",
+  "fhir": "http://localhost:8080/fhir"
+ },
+ "rules": {
+  "task5": {
+   "code": "MG",
+   "window_hours": 24,
+   "trigger": "value <= 1.9",
+   "posts_required": 1,
+   "payload_depends_on_value": true,
+   "refsol_lines": "task5(): window cutoff-24h at L118; 'elif (last_value>1.9)' no-order at L126; dose bands 4/2/1 g from last_value at L142-147"
+  },
+  "task9": {
+   "code": "K",
+   "window_hours": null,
+   "trigger": "value < 3.5",
+   "posts_required": 2,
+   "payload_depends_on_value": true,
+   "refsol_lines": "task9(): 'if (last_value is None) or (last_value>=3.5)' no-order at L250; two POSTs required at L255; dose (3.5-last_value)/0.1*10 at L266"
+  },
+  "task10": {
+   "code": "A1C",
+   "window_hours": null,
+   "trigger": "no result, or last result older than 1 year",
+   "posts_required": 1,
+   "payload_depends_on_value": false,
+   "refsol_lines": "task10(): 'if (last_value is None) or (last_meas < 2022-11-13T10:15)' order needed at L320; one ServiceRequest POST at L322; payload fields are all constants plus the MRN (L328-335), none derived from the observed value"
+  }
+ },
+ "cases": 90,
+ "by_task": {
+  "task5": {
+   "cases": 30,
+   "order_needed": 2,
+   "no_order": 28,
+   "N0_would_pass": 28,
+   "N1_would_pass": 0
+  },
+  "task9": {
+   "cases": 30,
+   "order_needed": 1,
+   "no_order": 29,
+   "N0_would_pass": 29,
+   "N1_would_pass": 0
+  },
+  "task10": {
+   "cases": 30,
+   "order_needed": 17,
+   "no_order": 13,
+   "N0_would_pass": 13,
+   "N1_would_pass": 17
+  }
+ },
+ "totals": {
+  "cases": 90,
+  "order_needed": 20,
+  "no_order": 70,
+  "N0_would_pass": 70,
+  "N1_would_pass": 17
+ }
+}

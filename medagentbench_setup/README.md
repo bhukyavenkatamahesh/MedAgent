@@ -6,6 +6,7 @@ Changes made to a clone of [stanfordmlgroup/MedAgentBench](https://github.com/st
 |---|---|
 | `medagentbench.patch` | Adds the local Ollama agents (`qwen2.5-local` 7B, plus the ~1B on-device SLMs `llama3.2-1b-local`, `gemma3-1b-local`, `qwen2.5-1.5b-local`, `lfm2-1.2b-local`), one assignment file per SLM (`configs/assignments/slm_<agent>[_lenient].yaml`), sample case selection, and the opt-in lenient parser |
 | `ollama-native-chat.yaml` | HTTPAgent config for Ollama's native `/api/chat`, with `num_ctx: 8192`. Used by the `llama3.2-1b-ctx8k` and `qwen2.5-1.5b-ctx8k` agents. The OpenAI-compatible endpoint stays at Ollama's 4096-token default, which the benchmark prompt plus one GET response overflows |
+| `null-n0` / `null-n1` agents (in the patch) | Scripted E1 agents with **no language model**, served by `scripts/e1_null_agent_server.py` on ports 11501/11502. N0 replies `FINISH([])` only; N1 posts one fixed order built from the task text. Used to show deterministically that a terminal PASS can be obtained with no retrieval |
 | `ollama-chat.yaml` | HTTPAgent config for a local Ollama server (`http://localhost:11434/v1/chat/completions`). The `Bearer ollama` header is a placeholder; Ollama doesn't check it |
 
 Apply:
@@ -38,6 +39,7 @@ Environment variables read by the task worker (set them when starting `src.start
   - `4` (v4): v2 + an explicit **decision step** (newest result, compare with the threshold, order only if low, report only the newest value).
 
 - `CASE_INDICES=125,127,...`: runs exactly these case indices (overrides `SAMPLE_N`). Used for the held-out set.
+  E0/E1 use all 90 check-then-order cases: `CASE_INDICES=$(python -c "print(','.join(str(i) for i in list(range(120,150))+list(range(240,300))))")`.
 
 Held-out set: `heldout_v1.json` lists 20 cases (10 order-required, 10 no-order) and the 8 synthetic lab results that create the extra order-required cases. Add them to the local FHIR server before a run and remove them afterwards:
 
