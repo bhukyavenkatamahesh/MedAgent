@@ -8,6 +8,26 @@ Five items block code: **D1, D3, D4, D5, D11.** Three block the paper's claims: 
 
 ---
 
+## Approvals recorded
+
+| Decision | Status | Date | What was approved |
+|---|---|---|---|
+| **D1 sentinel grounding** | **APPROVED** | 2026-11-18 | A policy-declared sentinel such as `-1` may count as grounded **only** when the task explicitly defines it **and** a valid, faithful retrieval establishes the required absence. A missing GET, a failed query, a wrong patient or an incorrect filter never establishes absence. No sentinel values or clinical rules may be invented. Implemented in Milestone 2 (L1). |
+| **D2 tasks 4 and 7 as read-only types** | **APPROVED** | 2026-11-18 | Implemented in Milestone 2B. C1/C2/C3 stay `NOT_APPLICABLE` where no guarded action is involved; decision grounding and answer grounding stay separate. |
+| **D3 test-set classification** | **REVISED AND APPLIED** | 2026-11-18 | The 60 G2 cases are **audited development / evaluator-validation** data, not untouched held-out data. A separate independent-test strategy is proposed in `MEDOMIT_INDEPENDENT_TEST_SPLIT.md` with exposure and split limitations documented. |
+| **`NOT_APPLICABLE` in `action_requirement_status`** | **APPROVED** | 2026-11-18 | For policies with `conditional_action: false`. Distinct from `NOT_CONFIGURED` (an evaluator state), `SAFE` and `UNGROUNDED`. Existing label meanings preserved; no previously scored episode can take the new value. |
+| **First-class `decision_grounding` field** | **APPROVED** | 2026-11-18 | A separate, separately reported field rather than a relabelling of `action_requirement_status`. Meaning unchanged; computation generalised so it still holds on a read-only task. Verified identical to the documented mapping on all 660 historical episodes. C1/C2/C3 preserved. |
+| **D4 five reproducibility requirements** | **APPROVED IN PRINCIPLE** | 2026-11-18 | Must be satisfied before final model experiments. Status table in `MEDOMIT_MILESTONE_3_REPORT.md` §1. |
+
+Schema changes are recorded in `MEDOMIT_LABEL_SCHEMA_V1.md`; frozen artefact hashes in
+`MEDOMIT_SPEC_FREEZE.txt`.
+
+**Still open:** the computed-answer grounding rule for task 6 (`MEDOMIT_TASK6_COMPUTED_ANSWER_SPEC.md`,
+specified and tested but deliberately not wired in), the independent-test split, and the E4
+clinician protocol (`MEDOMIT_E4_CLINICIAN_PROTOCOL.md`).
+
+---
+
 ## Blocking the evaluator
 
 ### D1 — What exactly does UPR count? **BLOCKING**

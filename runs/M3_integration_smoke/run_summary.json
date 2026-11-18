@@ -1,0 +1,25 @@
+{
+ "run_id": "2026-11-18__qwen2.5-1.5b-instruct__fewshot4__r1",
+ "episodes": 2,
+ "model_digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+ "quantization": "Q4_K_M",
+ "prompt_sha256": "24d5055e2a7ddb0ced090dc0c62a412e13545db97a2965dc1cc82edf49e24992",
+ "seed_support_measured": {
+  "file": "outputs/seed_check/seed_check_qwen2.5-1.5b-instruct.json",
+  "verdict": "honoured",
+  "reason": "the same seed reproduced the output exactly and a different seed changed it, at a temperature where sampling is active",
+  "cold_start_matches_warm": false,
+  "greedy_temperature_0_identical_3x": true
+ },
+ "seed_proxy": {
+  "requests": 4,
+  "distinct_cases": 2,
+  "seeds_injected": 4
+ },
+ "state_mutated_by_run": false,
+ "completion_status": {
+  "FINISH_PARSED": 2
+ },
+ "parser_vs_harness_disagreements": 0,
+ "full_run_reproducibility": "not demonstrated"
+}

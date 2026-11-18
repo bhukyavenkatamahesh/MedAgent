@@ -1,0 +1,58 @@
+INFO:     Started server process [35457]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:5200 (Press CTRL+C to quit)
+INFO:     127.0.0.1:56272 - "GET /api/list_workers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56275 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56277 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56323 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56325 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56367 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56369 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56411 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56413 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56456 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56458 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56460 - "GET /api/get_indices?name=medagentbench-std HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56462 - "GET /api/list_workers HTTP/1.1" 200 OK
+starting
+worker selected
+sending job
+starting
+worker selected
+sending job
+job sent
+INFO:     127.0.0.1:56464 - "POST /api/start_sample HTTP/1.1" 200 OK
+job sent
+INFO:     127.0.0.1:56466 - "POST /api/start_sample HTTP/1.1" 200 OK
+[Server] interact result
+INFO:     127.0.0.1:56523 - "POST /api/interact HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56530 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56532 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56574 - "GET /api/list_workers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56576 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56578 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56620 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56622 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56624 - "GET /api/list_workers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56666 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56668 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56710 - "GET /api/list_workers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56731 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+[Server] interact result
+[92mfinishing session[0m completed
+INFO:     127.0.0.1:56733 - "POST /api/interact HTTP/1.1" 200 OK
+[Server] interact result
+INFO:     127.0.0.1:56723 - "POST /api/interact HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56737 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+[Server] interact result
+[92mfinishing session[0m completed
+INFO:     127.0.0.1:56748 - "POST /api/interact HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56752 - "POST /api/calculate_overall HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56798 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56800 - "POST /api/receive_heartbeat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "GET /api/list_workers HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [35457]

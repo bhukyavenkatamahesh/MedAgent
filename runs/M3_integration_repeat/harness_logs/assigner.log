@@ -1,0 +1,48 @@
+/Users/venkatamahesh/Desktop/MedAgentBench/MedAgentBench/.venv/lib/python3.9/site-packages/transformers/utils/generic.py:311: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+W1118 23:44:54.484818 35476 .venv/lib/python3.9/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:29] NOTE: Redirects are currently not supported in Windows or MacOs.
+/Users/venkatamahesh/Desktop/MedAgentBench/MedAgentBench/.venv/lib/python3.9/site-packages/transformers/utils/generic.py:311: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  torch.utils._pytree._register_pytree_node(
+[93mWarning: 31 agent(s) and 0 task(s) are defined but not used, they will be ignored.[0m
+[93m    Agent: {'null-n1', 'deepseekv3', 'null-n0', 'qwen2.5-1.5b-local', 'llama3.2-1b-ctx8k', 'qwen2.5-1.5b-ctx8k-t07-s3', 'claude3.5', 'vicuna-13b', 'gpt-4o', 'qwen2.5-1.5b-ctx8k-t07-s1', 'qwen2.5-1.5b-ctx8k-t07-s2', 'mistral', 'lfm2-1.2b-local', 'llama-3.3', 'gemma2', 'llama3.2-1b-ctx8k-t07-s2', 'wizard-30b', 'vicuna-7b', 'qwen2.5-local', 'llama3.2-1b-local', 'gpt-4o-mini', 'qwen2.5', 'null-ro-n2', 'o1-mini', 'gemma3-1b-local', 'null-ro-n0', 'vicuna-33b', 'llama3.2-1b-ctx8k-t07-s1', 'qwen2.5-1.5b-ctx8k', 'llama3.2-1b-ctx8k-t07-s3', 'gemini-2.0'}[0m
+[93m    Task: set()[0m
+[92mcreating medagentbench-std client...[0m
+TaskClient created: medagentbench-std (http://localhost:5200/api)
+[96mMessage: 2 samples remaining.[0m
+[96mAgent "qwen2.5-1.5b-ctx8k-seeded" needs to run 1 tasks with total 2 samples:[0m
+[96m    Task "medagentbench-std": 2[0m
+Total:   0%|          | 0/2 [00:00<?, ?it/s]
+qwen2.5-1.5b-ctx8k-seeded:   0%|          | 0/2 [00:00<?, ?it/s][A                                            
+                                                                [ARunning Count: 0
+Total:   0%|          | 0/2 [00:00<?, ?it/s]
+qwen2.5-1.5b-ctx8k-seeded:   0%|          | 0/2 [00:00<?, ?it/s][A                                            
+                                                                [A[92mAssigned qwen2.5-1.5b-ctx8k-seeded/medagentbench-std#181[0m
+Total:   0%|          | 0/2 [00:00<?, ?it/s]
+qwen2.5-1.5b-ctx8k-seeded:   0%|          | 0/2 [00:00<?, ?it/s][A                                            
+                                                                [A[92mAssigned qwen2.5-1.5b-ctx8k-seeded/medagentbench-std#180[0m
+Total:   0%|          | 0/2 [00:00<?, ?it/s]
+qwen2.5-1.5b-ctx8k-seeded:   0%|          | 0/2 [00:00<?, ?it/s][A                                            
+                                                                [ARunning Count: 2
+Total:   0%|          | 0/2 [00:11<?, ?it/s]
+qwen2.5-1.5b-ctx8k-seeded:   0%|          | 0/2 [00:11<?, ?it/s][A                                            
+                                                                [ARunning Count: 2
+Total:   0%|          | 0/2 [00:24<?, ?it/s]
+qwen2.5-1.5b-ctx8k-seeded:   0%|          | 0/2 [00:24<?, ?it/s][A                                            
+                                                                [ARunning Count: 2
+Total:   0%|          | 0/2 [00:38<?, ?it/s]
+qwen2.5-1.5b-ctx8k-seeded:   0%|          | 0/2 [00:38<?, ?it/s][ATotal:  50%|█████     | 1/2 [00:39<00:39, 39.43s/it]
+qwen2.5-1.5b-ctx8k-seeded:  50%|█████     | 1/2 [00:39<00:39, 39.43s/it][ATotal: 100%|██████████| 2/2 [00:40<00:00, 16.70s/it]
+qwen2.5-1.5b-ctx8k-seeded: 100%|██████████| 2/2 [00:40<00:00, 16.70s/it][A                                                    
+                                                                        [ARunning Count: 0
+Total: 100%|██████████| 2/2 [00:51<00:00, 16.70s/it]
+qwen2.5-1.5b-ctx8k-seeded: 100%|██████████| 2/2 [00:51<00:00, 16.70s/it][ATotal: 100%|██████████| 2/2 [00:51<00:00, 25.60s/it]
+qwen2.5-1.5b-ctx8k-seeded: 100%|██████████| 2/2 [00:51<00:00, 25.60s/it]
+
+
+============================================
+[96mMessage: 2 sample(s) started. [0m
+[92m   >> 2 sample(s) finished successfully.[0m
+[96m   >> results are saved to /Users/venkatamahesh/Desktop/MedAgent/procsafe/runs/M3_integration_repeat/harness[0m
+============================================
+
+

@@ -1,0 +1,15 @@
+# MedOmit frozen specification hashes
+# Recorded 2026-11-18. Any change to a frozen artefact requires a new version number and a note in
+# the artefact itself. These hashes are what a run manifest should cite.
+
+computed-answer grounding specification v1.0
+  docs/MEDOMIT_TASK6_COMPUTED_ANSWER_SPEC.md   sha256 ed50be6b55267f10c34944ffc6cca00beea42ef5cf632f9561492604cbf72055
+  procsafe/aggregate_claims.py                 sha256 8cb111c8471da207c70c86f0f7c926b60ac4def8b2a2a7088c1307cdfbaf1799
+  tests/test_aggregate_claims.py               sha256 9b19abe1bcec62667b7ec3fff6fc071a3c006020bb2e18712d813e00ac4ac91f
+  status: SPECIFIED, TESTED, NOT WIRED INTO SCORING (awaiting approval)
+
+annotation guide v1 (frozen 2026-11-17)
+  ACTION_ANNOTATION_GUIDE.md                   sha256 c998505c8d4abdf36bb791371f8c467304a32e04a36256620bfd99e5a9be32a9
+
+reference grader (pinned, never redistributed)
+  refsol.py                                    sha256 67d19da263ac92c1b7075b3218ace3a4bd19b206a06fc7aebcc897dc39625419

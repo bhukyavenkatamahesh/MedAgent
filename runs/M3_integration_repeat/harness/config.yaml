@@ -1,0 +1,40 @@
+assignments:
+- agent: qwen2.5-1.5b-ctx8k-seeded
+  task: medagentbench-std
+concurrency:
+  agent:
+    qwen2.5-1.5b-ctx8k-seeded: 2
+  task:
+    medagentbench-std: 2
+definition:
+  agent:
+    qwen2.5-1.5b-ctx8k-seeded:
+      module: src.client.agents.HTTPAgent
+      parameters:
+        body:
+          model: qwen2.5:1.5b-instruct
+          options:
+            num_ctx: 8192
+            num_predict: 2048
+            temperature: 0
+          stream: false
+        headers:
+          Content-Type: application/json
+        prompter:
+          args:
+            agent_role: assistant
+          name: role_content_dict
+        return_format: '{response[message][content]}'
+        url: http://localhost:11690/api/chat
+  task:
+    medagentbench-std:
+      module: src.client.TaskClient
+      parameters:
+        concurrency: 1
+        controller_address: http://localhost:5200/api
+        data_file: data/medagentbench/test_data_v2.json
+        fhir_api_base: http://localhost:8080/fhir/
+        func_file: data/medagentbench/funcs_v1.json
+        max_round: 8
+        name: medagentbench-std
+output: /Users/venkatamahesh/Desktop/MedAgent/procsafe/runs/M3_integration_repeat/harness

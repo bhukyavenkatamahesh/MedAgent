@@ -1,0 +1,12 @@
+INFO:     Started server process [35381]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Started server process [35380]
+INFO:     Waiting for application startup.
+ERROR:    [Errno 48] error while attempting to bind on address ('0.0.0.0', 5202): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('0.0.0.0', 5201): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.

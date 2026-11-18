@@ -1,0 +1,164 @@
+{
+ "experiment_id": "M3_integration_smoke",
+ "run_id": "2026-11-18__qwen2.5-1.5b-instruct__fewshot4__r1",
+ "manifest_version": 1,
+ "created_at": "2026-11-18T18:14:20.683093+00:00",
+ "started_at": "2026-11-18T18:14:20.512943+00:00",
+ "ended_at": null,
+ "model": {
+  "name": "qwen2.5:1.5b-instruct",
+  "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+  "quantization": "Q4_K_M",
+  "parameter_size": "1.5B",
+  "family": "qwen2",
+  "runtime": "ollama",
+  "runtime_version": "0.40.16",
+  "source": "ollama /api/tags, read at launch"
+ },
+ "prompt": {
+  "version": "fewshot4",
+  "sha256": "24d5055e2a7ddb0ced090dc0c62a412e13545db97a2965dc1cc82edf49e24992",
+  "components": {
+   "worker_module_sha256": "fc12c5655cfe6c9e8b5c50d291840df59a6f2a23b36fa2cc73f2c03689933ad5",
+   "prompt_template_sha256": "2f8a8bbef296f8d326f1e26285ffb97b3ed47221049c95f26a09cfddf0522533",
+   "fewshot_constant": "FEWSHOT_BLOCK_V4",
+   "fewshot_block_sha256": "0692f754dcbc90b3fda077207015129683732c1111a1970c2506e7ff96e86b52"
+  },
+  "source": "/Users/venkatamahesh/Desktop/MedAgentBench/MedAgentBench/src/server/tasks/medagentbench/__init__.py",
+  "note": "Hashes the template and the selected few-shot block as the worker defines them. The rendered per-case prompt also contains the case's own instruction and context, which the case table already pins."
+ },
+ "seeds": {
+  "scheme": "sha256(experiment_id:case_id:repeat) mod (2**31-1)",
+  "requested": {
+   "task7_1": 642931390,
+   "task7_2": 436868365
+  },
+  "runtime": "ollama 0.40.16",
+  "seed_support": "honoured",
+  "deterministic": false,
+  "determinism_caveat": "A requested seed constrains sampling only. Reproduction also requires the same runtime build, hardware, batch/concurrency settings and simulator state, none of which a seed pins.",
+  "note": "The runtime accepts a seed parameter, but determinism across server builds, hardware and concurrency has not been verified in this project.",
+  "measured_support": {
+   "file": "outputs/seed_check/seed_check_qwen2.5-1.5b-instruct.json",
+   "verdict": "honoured",
+   "reason": "the same seed reproduced the output exactly and a different seed changed it, at a temperature where sampling is active",
+   "cold_start_matches_warm": false,
+   "greedy_temperature_0_identical_3x": true
+  }
+ },
+ "repeat": 1,
+ "cases": {
+  "count": 2,
+  "indices": [
+   180,
+   181
+  ],
+  "cases": [
+   {
+    "case_index": 180,
+    "task_id": "task7_1",
+    "patient_id": "S2823623"
+   },
+   {
+    "case_index": 181,
+    "task_id": "task7_2",
+    "patient_id": "S2197736"
+   }
+  ],
+  "patients": [
+   "S2197736",
+   "S2823623"
+  ],
+  "codes": [
+   "GLU"
+  ]
+ },
+ "policies": [
+  {
+   "path": "policies/mab_task7_glucose_query_v1.yaml",
+   "sha256": "aa8d7c9c59ef3e4057c8116119d304724b8196c9d800af434ba8b84007b3a393",
+   "policy_id": "mab_task7_glucose_query",
+   "version": "1.0",
+   "status": "TASK_NATIVE_PREREQUISITES_ONLY",
+   "review_status": null
+  }
+ ],
+ "evaluator": {
+  "repo": "/Users/venkatamahesh/Desktop/MedAgent/procsafe",
+  "commit": "71365ab41dbe5b54efb9b8be5940d166eeea4320",
+  "clean_worktree": false,
+  "dirty_paths": [
+   "ocs/MEDOMIT_LABEL_SCHEMA_V1.md",
+   "docs/MEDOMIT_TASK_CONSTRAINT_COVERAGE.md",
+   "procsafe/checker.py",
+   "procsafe/policy.py",
+   "tests/test_v2_action_requirements.py",
+   "docs/MEDOMIT_INDEPENDENT_TEST_SPLIT.md",
+   "docs/MEDOMIT_MILESTONE_2B_REPORT.md",
+   "policies/mab_task4_magnesium_query_v1.yaml",
+   "policies/mab_task7_glucose_query_v1.yaml",
+   "procsafe/fhir_state.py",
+   "procsafe/runtime_fingerprints.py",
+   "procsafe/seed_proxy.py",
+   "runs/M3_integration_smoke/",
+   "scripts/medomit_launch.py",
+   "scripts/medomit_seed_check.py",
+   "scripts/score_g2_runs.py",
+   "tests/test_readonly_tasks.py"
+  ],
+  "source_sha256": "8cbcd3d44e550bf98e26a782c8c4ac2476927d4571dec688e7719062432a945e",
+  "source_files": 15
+ },
+ "grader": {
+  "path": "/Users/venkatamahesh/Desktop/MedAgentBench/MedAgentBench/src/server/tasks/medagentbench/refsol.py",
+  "sha256": "67d19da263ac92c1b7075b3218ace3a4bd19b206a06fc7aebcc897dc39625419"
+ },
+ "benchmark": {
+  "repo": "/Users/venkatamahesh/Desktop/MedAgentBench/MedAgentBench",
+  "test_data_sha256": "b6e89b2ef82f1bef27c5778a644a8a66c7b25738bbd6a48d03ab3e5182df6ca8"
+ },
+ "simulator": {
+  "container": "great_burnell",
+  "image_digest": "sha256:3fb83d7ed71c5476f9eb6212bd440a909ef7505922bbc757dc488a8fc0701966",
+  "state_before": {
+   "scope_sha256": "0beea83bce4f39fa49ea677c4dac4675efde21f38bedcbc230c2914893679324",
+   "observations_sha256": "57faef4ad9d38d7c8f9790c4e32fc4bbecb6e68a49a27ce1de8e465ad5eaa574",
+   "writes_sha256": "9dc59019bba307e41a1aa0133266f518b14d041b072a2351779de7f1f1be40fa",
+   "write_counts_total": {
+    "MedicationRequest": 108,
+    "ServiceRequest": 0,
+    "Observation": 5720,
+    "Procedure": 738
+   },
+   "patients": 2,
+   "codes": [
+    "GLU"
+   ],
+   "method": "canonical projection [effectiveDateTime, value, unit, codings] per patient+code",
+   "fingerprint": "91941f63ec22ce1c3d08e164876e27dadd3247615ef760da704e38fec149a9eb"
+  },
+  "state_after": null,
+  "state_mutated_by_run": null,
+  "pristine_check": {
+   "status": "no_baseline",
+   "note": "no pristine baseline recorded, so state identity cannot be asserted"
+  },
+  "note": "An image digest pins the software, not the record. The state fingerprint is what pins the record; see procsafe/fhir_state.py for exactly what is hashed and how to reset it."
+ },
+ "host": {
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.9.6",
+  "cpu_count": 10
+ },
+ "artifacts": {
+  "run_dir": "runs/M3_integration_repeat",
+  "seed_proxy_log": "runs/M3_integration_repeat/seed_proxy.jsonl"
+ },
+ "episodes": [],
+ "unavailable": {
+  "full_run_reproducibility": "not demonstrated: no run has been repeated and compared",
+  "status": "pre-run manifest, run not yet executed"
+ },
+ "manifest_sha256": "b5ae26d9d8af17f4fa4cf0839efac7b82b661d7ac8aba40912a2c3463f0ce413"
+}

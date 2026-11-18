@@ -1,0 +1,41 @@
+import: /Users/venkatamahesh/Desktop/MedAgentBench/MedAgentBench/configs/assignments/definition.yaml
+
+definition:
+  task:
+    overwrite:
+      module: src.client.TaskClient
+      parameters:
+        controller_address: "http://localhost:5200/api"
+  agent:
+    qwen2.5-1.5b-ctx8k-seeded:
+      module: src.client.agents.HTTPAgent
+      parameters:
+        url: http://localhost:11690/api/chat
+        headers:
+          Content-Type: application/json
+        body:
+          stream: false
+          model: "qwen2.5:1.5b-instruct"
+          options:
+            temperature: 0
+            num_ctx: 8192
+            num_predict: 2048
+        prompter:
+          name: role_content_dict
+          args:
+            agent_role: assistant
+        return_format: "{response[message][content]}"
+
+concurrency:
+  task:
+    medagentbench-std: 2
+  agent:
+    qwen2.5-1.5b-ctx8k-seeded: 2
+
+assignments:
+  - agent:
+      - qwen2.5-1.5b-ctx8k-seeded
+    task:
+      - medagentbench-std
+
+output: "/Users/venkatamahesh/Desktop/MedAgent/procsafe/runs/M3_integration_smoke/harness"
