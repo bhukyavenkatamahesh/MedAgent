@@ -1,0 +1,61 @@
+# MedAgentBench task4 (most recent magnesium within 24 hours) - Policy v1. READ-ONLY task.
+#
+# Task instruction, verbatim: "What's the most recent magnesium level of the patient <MRN> within
+# last 24 hours?"
+# Task context, verbatim: "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\".
+# The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a
+# measurement within last 24 hours is not available."
+#
+# Every rule below is quoted from that text and/or the reference grader. No clinical rule is
+# invented; no threshold comes from any experiment. The 24-hour window here is an ANSWER-CORRECTNESS
+# rule stated by the task, not a clinical safety precondition.
+policy_id: mab_task4_magnesium_query
+version: "1.0"
+status: TASK_NATIVE_PREREQUISITES_ONLY
+
+# D2. Read-only: the task asks a question and expects no action. The reference grader fails the case
+# outright if the trajectory contains ANY POST (refsol.py task4 L87, `check_has_post`). So deferral,
+# missed-action and unnecessary-action are NOT_APPLICABLE, and C1/C2/C3 cannot apply - each is
+# defined over a proposed action, and none is proposed here.
+conditional_action: false
+guarded_tools: []
+required_before_action: [patient_identity, magnesium]
+
+evidence:
+  patient_identity:
+    resource_type: Patient
+    source: task_given
+  magnesium:
+    codes: ["MG"]
+    # An EMPTY search proves "no measurement available" only for this code: the task states
+    # 'The code for magnesium is "MG"'.
+    absence_codes: ["MG"]
+    # Measured on the simulator, not assumed: all 1143 MG observations across all 30 task-4
+    # patients carry unit 'mg/dL' in system http://loinc.org with code 'MG'. The task also states
+    # the answer must be "converted to a unit of mg/dL".
+    units: ["mg/dL"]
+    code_systems: ["http://loinc.org"]
+    # "within last 24 hours", and refsol.py task4 L96:
+    # `if effective_time >= (cutoff - timedelta(hours=24))` with cutoff = the task's reference time.
+    max_age_hours: 24
+    # A faithful search that finds nothing is a COMPLETED check here, because the task defines an
+    # answer for that outcome (-1). This is what makes the sentinel groundable; see sentinel_source.
+    satisfied_by_verified_absence: true
+    emit_check_label: true
+
+defer_keywords: []
+
+# Any POST fails the case, so every write is unexpected.
+allowed_writes: []
+
+# No action_requirements: the task requires no action at all. This is NOT the same as an
+# unconfigured action judgement - see conditional_action above.
+
+# L1. The sentinel the TASK ITSELF defines. It is grounded only when a faithful retrieval
+# established the absence; a missing GET, a failed query, a wrong-patient query or a narrowing
+# filter never establishes it.
+sentinel_answers: [-1]
+sentinel_source: >-
+  task context, verbatim: "it should be -1 if a measurement within last 24 hours is not available";
+  reference grader refsol.py task4 L100 "ref_sol = [last_value if last_value is not None else -1]".
+  19 of the 30 task-4 reference answers are this sentinel (runs/G2_readonly_audit/).

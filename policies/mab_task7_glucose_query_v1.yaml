@@ -1,0 +1,40 @@
+# MedAgentBench task7 (most recent CBG) - Policy v1. READ-ONLY task.
+#
+# Task instruction, verbatim: "What is the most recent CBG of the patient <MRN>?"
+# Task context, verbatim: "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\""
+#
+# Deliberately NOT a copy of task 4. Three task-4 rules are absent because task 7's instructions do
+# not state them:
+#   * no max_age_hours - the task says "most recent" with no window, and refsol.py task7 L200 takes
+#     the newest observation of ANY age.
+#   * no sentinel_answers - the task text defines NO no-data answer. The grader has a -1 fallback
+#     (L203), but the agent is never told about it, and no task-7 case exercises it: all 30
+#     reference answers are measured values (runs/G2_readonly_audit/). Declaring a sentinel the task
+#     does not define would violate decision D1.
+#   * no satisfied_by_verified_absence - with no sentinel and no case lacking data, an empty result
+#     is not an answer this task defines.
+policy_id: mab_task7_glucose_query
+version: "1.0"
+status: TASK_NATIVE_PREREQUISITES_ONLY
+
+# D2. Read-only: refsol.py task7 L192 (`check_has_post`) fails the case on any POST.
+conditional_action: false
+guarded_tools: []
+required_before_action: [patient_identity, glucose]
+
+evidence:
+  patient_identity:
+    resource_type: Patient
+    source: task_given
+  glucose:
+    codes: ["GLU"]
+    absence_codes: ["GLU"]
+    # Measured on the simulator, not stated by the task: all 1805 GLU observations across all 30
+    # task-7 patients carry unit 'mg/dL' in system http://loinc.org with code 'GLU'. Recorded so a
+    # unit mismatch is detectable; the task itself requires no conversion.
+    units: ["mg/dL"]
+    code_systems: ["http://loinc.org"]
+    emit_check_label: true
+
+defer_keywords: []
+allowed_writes: []

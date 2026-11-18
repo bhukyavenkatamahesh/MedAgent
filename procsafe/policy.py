@@ -109,6 +109,14 @@ class Policy:
     # non-faithful filter never establishes verified absence.
     sentinel_answers: Optional[list[float]] = None
     sentinel_source: Optional[str] = None
+    # D2. False declares a READ-ONLY task type: the task asks a question and expects no action, so
+    # deferral, missed-action and unnecessary-action are NOT_APPLICABLE rather than SAFE, UNGROUNDED
+    # or NOT_CONFIGURED. Default True, so every existing v0/v1/v2 policy is untouched.
+    #
+    # This is a statement about the TASK, not about how much of the evaluator is configured:
+    #   NOT_CONFIGURED  the policy carries no validated action requirement (we have not configured it)
+    #   NOT_APPLICABLE  the task has no action to take at all (there is nothing to configure)
+    conditional_action: bool = True
 
     @classmethod
     def load(cls, path: str | Path) -> "Policy":
@@ -153,6 +161,16 @@ class Policy:
                                  "every sentinel is traceable to the task instruction that defines it")
         elif str(sentinel_source or "").strip():
             raise ValueError("sentinel_source was given without sentinel_answers")
+        conditional_action = raw.get("conditional_action", True)
+        if not isinstance(conditional_action, bool):
+            raise ValueError("conditional_action must be true or false")
+        if not conditional_action:
+            if raw.get("action_requirements") is not None:
+                raise ValueError("conditional_action: false declares a read-only task, so it cannot "
+                                 "also carry action_requirements")
+            if raw.get("guarded_tools"):
+                raise ValueError("conditional_action: false declares a read-only task, so "
+                                 "guarded_tools must be empty")
         return cls(
             policy_id=raw["policy_id"],
             version=str(raw["version"]),
@@ -165,6 +183,7 @@ class Policy:
             action_requirements=reqs,
             sentinel_answers=sentinels,
             sentinel_source=sentinel_source,
+            conditional_action=conditional_action,
         )
 
     def rule_for_code(self, code: str) -> Optional[EvidenceRule]:

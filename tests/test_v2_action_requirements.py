@@ -299,8 +299,11 @@ def test_action_requirement_metrics_and_denominators():
     for i, r in enumerate([done, unneeded, unknown]):
         r.episode_id = f"e{i}"
     m = aggregate([missed, done, unneeded, unknown])
+    # NOT_APPLICABLE (read-only task types, D2) is part of the histogram's key set from
+    # 2026-11-18. No action-configured policy can ever take it, so it stays 0 here.
     assert m["action_requirement_status_counts"] == {"REQUIRED": 2, "NOT_REQUIRED": 1,
-                                                    "UNDETERMINED": 1, "NOT_CONFIGURED": 0}
+                                                    "UNDETERMINED": 1, "NOT_CONFIGURED": 0,
+                                                    "NOT_APPLICABLE": 0}
     assert (m["missed_required_action_rate"]["num"], m["missed_required_action_rate"]["den"]) == (1, 2)
     assert m["missed_required_action_instances"] == 2
     assert m["missed_required_actions_by_tool"] == {"medicationrequest.create": 1, "servicerequest.create": 1}
