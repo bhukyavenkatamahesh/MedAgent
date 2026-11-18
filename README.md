@@ -124,7 +124,25 @@ Real benchmark-agent runs done so far, all on a local MedAgentBench + FHIR serve
 | Prompt ablation (format-only vs clinical sequence vs decision step) | Llama 3.2 1B, Qwen 2.5 1.5B | same 10 | `runs/2026-11-16_slm-ablation_n10/` |
 | Held-out, balanced, repeated (4 runs per condition) | Llama 3.2 1B, Qwen 2.5 1.5B | 20 held-out: 10 order-required, 10 no-order | `runs/2026-11-16_slm-heldout_n20/` |
 
-### Headline result (E0 + E1, deterministic, no model inference)
+### Governing plan: MedOmit
+
+The guide's plan *MedOmit: A Process-Aware Safety Benchmark for Clinical Tool-Calling Agents*
+(2026-11-18) is the research roadmap. This repository is its **foundation, not a restart**: the plan's
+pipeline — trajectory adapter, evidence mapper, per-turn safety checker, metrics and reports — is
+built, tested and human-validated. Gap-and-reuse audit, with the plan's five opening questions
+answered from our data and seven clarifications for the guide's approval:
+**[docs/MEDOMIT_PLAN_ALIGNMENT.md](docs/MEDOMIT_PLAN_ALIGNMENT.md)**.
+
+| Plan constraint | Status |
+|---|---|
+| **C2** precondition check (required lab absent or stale before an order) | built for the benchmark's own preconditions, across all three check-then-order task types |
+| **C3** unsafe write (write without the required read) | built, except the "mandated confirmation" half |
+| **C1** contraindication (drug vs recorded allergy or condition) | **not started** — needs clinical rules the benchmark does not state, so it is gated on the clinician |
+
+Numbering note: the plan's E1–E10 clash with the earlier E0–E7. The plan's numbers are canonical;
+our grader audit and null agents are **G0** and **G1** below.
+
+### Headline result (G0 + G1, deterministic, no model inference)
 
 **A terminal PASS on this benchmark does not imply the agent received the evidence the task
 requires.** Two scripted agents with no language model, run through the unmodified harness and the
@@ -142,7 +160,7 @@ passes as `UNVERIFIED_PASS` — **100% sensitivity, no false negatives** — and
 distinction the grader's single PASS cannot make. The 17 task-10 cases are the sharpest: an order
 genuinely *was* required, and a blind agent got full credit for placing it.
 
-Details: [E0 grader audit](runs/E0_grader_audit/README.md) · [E1 null agents](runs/E1_null_agents/README.md).
+Details: [G0 grader audit](runs/E0_grader_audit/README.md) · [G1 null agents](runs/E1_null_agents/README.md) (directory names keep the original E0/E1 for provenance).
 Grader pinned at sha256 `67d19da2…`; MedAgentBench ships no public `refsol.py`, so it is pinned by
 hash rather than diffed.
 
@@ -153,7 +171,7 @@ hash rather than diffed.
 | Evaluator: process safety, grounding, action requirements | built; independently audited 2026-11-17 (3 bugs found and fixed) — [audit](docs/IMPLEMENTATION_AUDIT.md) |
 | Human validation v1 (30 episodes, 2 reviewers, adjudicated) | **complete and frozen** — [report](outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md), [freeze manifest](outputs/human_validation_v1/FROZEN_v1_MANIFEST.md) |
 | Guide v2, evaluator improvements, `heldout_v2`, final experiment | **proposed, awaiting supervisor decisions** — [research plan](docs/RESEARCH_PLAN_NEXT_MILESTONE.md) |
-| E0 grader audit + E1 scripted null agents | **done 2026-11-17**, deterministic, no model inference |
+| G0 grader audit + G1 scripted null agents | **done 2026-11-17**, deterministic, no model inference |
 | Task-10 policy (the only task type with natural order-required cases: 17 of 30) | **done 2026-11-18** — `policies/mab_task10_hba1c_v2.yaml`; all three check-then-order task types are now covered |
 | Coverage beyond 90 cases (210 remaining, no fine-tuning needed) | planned — [coverage plan](docs/BENCHMARK_COVERAGE_PLAN.md) |
 | Fine-tuning | **conditional and optional**, gated behind the master report's six conditions; reported as a stress test of the benchmark, never as the contribution |

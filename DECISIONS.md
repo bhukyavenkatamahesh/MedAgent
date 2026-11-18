@@ -612,3 +612,40 @@ Improving the evaluator with **more of the benchmark** rather than more training
   synthetic cases only for deliberate edge scenarios.
 - Tests: 14 new in `tests/test_task10_policy.py`. Suite: **281 passing**.
 
+## 2026-11-18 (b): the guide's MedOmit plan adopted as the roadmap
+
+The guide sent `MedOmit-full-plan.docx` and `plan.pdf` (the same eight-page document):
+*MedOmit — A Process-Aware Safety Benchmark for Clinical Tool-Calling Agents*. Adopted as the
+governing research specification. **No restart:** audit in `docs/MEDOMIT_PLAN_ALIGNMENT.md`.
+
+- **Built already:** the plan's whole Section 5 pipeline (trajectory adapter, evidence mapper with
+  read-set validation, per-turn safety checker judged at the time of the action, metrics and
+  reports), C2 for all three check-then-order task types, most of C3, plus the grader audit and null
+  agents the plan does not include.
+- **Genuinely new work:** C1 contraindication; the "mandated confirmation" half of C3; the per-turn
+  SAFE/UNSAFE/DEFER presentation layer with gold `should_defer` labels; UPR / Safe-SR / MDH metric
+  definitions; the release dataset format; the model sweep breadth (2 of 9 models, 3 of 10 task
+  types); the clinician gate.
+- **Numbering:** the plan's E1-E10 clash with our earlier E0-E7. The plan's numbers are canonical;
+  ours are renamed **G0** (grader audit) and **G1** (null agents). Run directories keep their
+  original names for provenance.
+- **Seven clarifications recorded for approval** rather than silently changing the plan's scope:
+  (A) the write-centric constraints must not lose the no-order finding - verified that **all 107
+  development passes are no-order cases and none involved a guarded action**, so write-time-only
+  checking would hide all 42 ungrounded passes; (B) C1 and the renal flavour of C2 are new clinical
+  rules, separately versioned, never retro-applied to earlier runs; (C) three labels are a
+  presentation layer over the detailed internal ones, and DEFER must mean "appropriately refrained",
+  not "evidence missing"; (D) C2 and C3 overlap by construction, so per-constraint counts are not
+  additive; (E) the on-device claim needs a resource side-log and 8B is not a phone; (F) the
+  literature claim must narrow to decision-time FHIR constraints, since MedCTA/PAE/Hong/Cedar
+  already score process; (G) `terminal_pass` cannot live in a task definition - task, episode and
+  turn-label files must be separate, keyed by a unique run/episode id.
+- **Corrections to figures the plan cites:** invalid/ungraded is **86/480 (17.9%)**, not 80/480;
+  42/107 = 39.3% reproduces exactly from the tracked audit outputs, but the stricter definition
+  ("no successful required retrieval at all") gives **53/107 = 49.5%** - which is the plan's own
+  question 4; and the plan's Table 7 query-vs-action split is not computable yet, because every
+  held-out episode is task 5 or task 9.
+- **Phase 0 is this document.** Next: settle the five questions and the numbering, start clinician
+  recruitment in parallel, then tasks 4 and 7 policies, per-case seeds, model smoke tests, the
+  dataset emitter, and C1 once the clinician is in place.
+
