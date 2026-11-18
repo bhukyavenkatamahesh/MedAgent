@@ -9,7 +9,7 @@ Evidence: `outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md`.
 
 | ID | Item | Evidence | Re-scoring cost | Priority |
 |---|---|---|---|---|
-| **E9** | Task-defined sentinel answers and hyphenated ranges in grounding | Task 10 tells the agent to answer `[-1]` when no measurement exists; the checker reports that correct answer as `UNGROUNDED` because a sentinel is not a retrieved value. Separately, `_CODE_RE` erases hyphenated ranges, so "3.5-4.5" yields no claims at all | Medium — changes `grounding_result` on task-10 episodes once they are run | High, and it belongs with E2/E3 in one grounding change |
+| **L1** ~~E9~~ *(IMPLEMENTED 2026-11-18, see `MEDOMIT_MILESTONE_2_L1_REPORT.md`)* | Task-defined sentinel answers and hyphenated ranges in grounding | Task 10 tells the agent to answer `[-1]` when no measurement exists; the checker reports that correct answer as `UNGROUNDED` because a sentinel is not a retrieved value. Separately, `_CODE_RE` erases hyphenated ranges, so "3.5-4.5" yields no claims at all | Medium — changes `grounding_result` on task-10 episodes once they are run | High, and it belongs with E2/E3 in one grounding change |
 | **E8** | **A task-10 policy** (A1C: order when there is no result or the last one is older than a year) | E1: a blind agent passes **17 order-required task-10 cases** with no retrieval, and the checker cannot label any of them — no policy exists | None — new policy, no existing figure changes | **Highest.** It is the only task type with natural positive-action cases, and the only evidence-free passes the checker currently misses |
 | **E1** | A label for "checked, no action needed, none taken" | 8 of 14 disagreements; `APPROPRIATE_DEFER` recall 0.20 | **High** — changes `process_result` and every `APPROPRIATE_DEFER` count published | Blocked on guide issue 1 |
 | **E2** | Exclude resource ids, codes, MRNs and timestamps from grounding claims | 3 of 14 (`ANN-02`, `ANN-12`, `ANN-25`) | Medium — changes `grounding_result` and `verified_outcome` | High |
@@ -18,6 +18,10 @@ Evidence: `outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md`.
 | **E5** | Carry turn-level labels into the annotation key | the first comparison run read 10.0% instead of 100.0% on premature/unsafe because `episode_id` identifies the *case*, not the run | None — tooling only | High (cheap) |
 | **E6** | Give `UNNECESSARY_ACTION` a test set that actually contains the positive class | both sides found 0 in 30 episodes; κ undefined, F1 meaningless | None — case selection | High |
 | **E7** | Record the unit alongside every claim comparison | unit mismatch is currently invisible in the grounding output | Low | Low |
+
+> **Renumbered 2026-11-18.** This item was previously called "E9". It is now **L1**, because the
+> supervisor's MedOmit plan uses **E9** for a different thing entirely — the terminal-success vs
+> process-safety correlation experiment. The two must never be confused.
 
 ## Detail
 

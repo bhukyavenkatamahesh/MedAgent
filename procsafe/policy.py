@@ -99,6 +99,16 @@ class Policy:
     # Optional. tool -> ActionRequirement. None (key absent) = no action-requirement judgement
     # at all (status NOT_CONFIGURED), which is the behaviour of every v0 / v1 policy.
     action_requirements: Optional[dict[str, ActionRequirement]] = None
+    # L1. Answer values that the TASK ITSELF defines as "no qualifying measurement exists"
+    # (MedAgentBench tasks 4 and 10 mandate -1). None/absent = the task defines no sentinel, which
+    # is the behaviour of every v0/v1/v2 policy. A sentinel is NEVER a default: it must be declared
+    # per policy and `sentinel_source` must quote the task instruction it comes from.
+    #
+    # A sentinel counts as grounded ONLY when a faithful retrieval established the required absence
+    # (EvidenceState.verified_empty). A missing GET, a failed query, a wrong-patient query or a
+    # non-faithful filter never establishes verified absence.
+    sentinel_answers: Optional[list[float]] = None
+    sentinel_source: Optional[str] = None
 
     @classmethod
     def load(cls, path: str | Path) -> "Policy":
@@ -129,6 +139,20 @@ class Policy:
                                      "NOT_REQUIRED, UNDETERMINED or REQUIRED")
                 reqs[tool] = ActionRequirement(tool=tool, operator=cond["operator"],
                                                value=float(cond["value"]), **cfg)
+        sentinels = raw.get("sentinel_answers")
+        sentinel_source = raw.get("sentinel_source")
+        if sentinels is not None:
+            if not isinstance(sentinels, list) or not sentinels:
+                raise ValueError("sentinel_answers must be a non-empty list of numbers")
+            try:
+                sentinels = [float(s) for s in sentinels]
+            except (TypeError, ValueError):
+                raise ValueError("sentinel_answers must contain numbers only")
+            if not str(sentinel_source or "").strip():
+                raise ValueError("sentinel_source is required whenever sentinel_answers is set, so "
+                                 "every sentinel is traceable to the task instruction that defines it")
+        elif str(sentinel_source or "").strip():
+            raise ValueError("sentinel_source was given without sentinel_answers")
         return cls(
             policy_id=raw["policy_id"],
             version=str(raw["version"]),
@@ -139,6 +163,8 @@ class Policy:
             defer_keywords=[k.lower() for k in raw.get("defer_keywords", [])],
             allowed_writes=raw.get("allowed_writes"),
             action_requirements=reqs,
+            sentinel_answers=sentinels,
+            sentinel_source=sentinel_source,
         )
 
     def rule_for_code(self, code: str) -> Optional[EvidenceRule]:

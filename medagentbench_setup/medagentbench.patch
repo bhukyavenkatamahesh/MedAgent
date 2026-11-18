@@ -1,8 +1,8 @@
 diff --git a/configs/agents/api_agents.yaml b/configs/agents/api_agents.yaml
-index 7df2d6e..56522f3 100644
+index 7df2d6e..a457d52 100644
 --- a/configs/agents/api_agents.yaml
 +++ b/configs/agents/api_agents.yaml
-@@ -75,4 +75,136 @@ mistral:
+@@ -75,4 +75,154 @@ mistral:
  claude3.5:
      import: "./claude-chat.yaml"
      parameters:
@@ -141,6 +141,24 @@ index 7df2d6e..56522f3 100644
 +        url: http://localhost:11502/api/chat
 +        body:
 +            model: "scripted-null-n1"
++
++# ---- G2 scripted null agents for the READ-ONLY tasks 4 and 7 (no language model;
++#      served by procsafe/scripts/g2_null_agent_server.py) ----
++null-ro-n0:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "null-ro-n0"
++        url: http://localhost:11511/api/chat
++        body:
++            model: "scripted-null-n0-readonly"
++
++null-ro-n2:
++    import: "./ollama-native-chat.yaml"
++    parameters:
++        name: "null-ro-n2"
++        url: http://localhost:11512/api/chat
++        body:
++            model: "scripted-null-n2-readonly"
 diff --git a/configs/assignments/default.yaml b/configs/assignments/default.yaml
 index ebeae42..de939cd 100644
 --- a/configs/assignments/default.yaml
@@ -210,6 +228,67 @@ index 0000000..11dfeb1
 +      - medagentbench-std
 +
 +output: "outputs/E1_null"
+diff --git a/configs/assignments/g2_definition.yaml b/configs/assignments/g2_definition.yaml
+new file mode 100644
+index 0000000..197317e
+--- /dev/null
++++ b/configs/assignments/g2_definition.yaml
+@@ -0,0 +1,13 @@
++# G2 read-only null-agent runs. Uses its own controller on port 5100 so an already-running worker
++# pool on 5000 (serving a different CASE_INDICES set) is left completely alone.
++definition:
++  task:
++    overwrite:
++      module: src.client.TaskClient
++      parameters:
++        controller_address: "http://localhost:5100/api"
++    import: ../tasks/task_assembly.yaml
++  agent:
++    import:
++      - ../agents/api_agents.yaml
++      - ../agents/fs_agent.yaml
+diff --git a/configs/assignments/g2_null-ro-n0.yaml b/configs/assignments/g2_null-ro-n0.yaml
+new file mode 100644
+index 0000000..cae4a94
+--- /dev/null
++++ b/configs/assignments/g2_null-ro-n0.yaml
+@@ -0,0 +1,15 @@
++import: g2_definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 4
++  agent:
++    null-ro-n0: 4
++
++assignments:
++  - agent:
++      - null-ro-n0
++    task:
++      - medagentbench-std
++
++output: "outputs/G2_null_ro_n0"
+diff --git a/configs/assignments/g2_null-ro-n2.yaml b/configs/assignments/g2_null-ro-n2.yaml
+new file mode 100644
+index 0000000..dfab42b
+--- /dev/null
++++ b/configs/assignments/g2_null-ro-n2.yaml
+@@ -0,0 +1,15 @@
++import: g2_definition.yaml
++
++concurrency:
++  task:
++    medagentbench-std: 4
++  agent:
++    null-ro-n2: 4
++
++assignments:
++  - agent:
++      - null-ro-n2
++    task:
++      - medagentbench-std
++
++output: "outputs/G2_null_ro_n2"
 diff --git a/configs/assignments/slm_gemma3-1b-local.yaml b/configs/assignments/slm_gemma3-1b-local.yaml
 new file mode 100644
 index 0000000..35fe5dd

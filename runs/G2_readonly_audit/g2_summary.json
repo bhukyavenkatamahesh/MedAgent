@@ -1,0 +1,29 @@
+{
+ "fhir_base": "http://localhost:8080/fhir/",
+ "generated": "2026-11-18T22:49:48.397543+05:30",
+ "note": "Read-only tasks. No model inference. No policy applied. Separate from G0/G1.",
+ "tasks": {
+  "task4": {
+   "cases": 30,
+   "order_required": 0,
+   "reference_answer_is_sentinel": 19,
+   "reference_answer_is_a_value": 11,
+   "observations_total": 1143,
+   "n0_predicted_passes": 0,
+   "n2_predicted_passes": 19,
+   "n2_blind_answer": "[-1]",
+   "refsol_lines": "task4(): check_has_post -> False at L87; Observation?code=MG&_count=5000 at L89; 'if effective_time >= (cutoff - timedelta(hours=24))' at L96; ref_sol = [last_value if last_value is not None else -1] at L100; exact list comparison at L104"
+  },
+  "task7": {
+   "cases": 30,
+   "order_required": 0,
+   "reference_answer_is_sentinel": 0,
+   "reference_answer_is_a_value": 30,
+   "observations_total": 1805,
+   "n0_predicted_passes": 0,
+   "n2_predicted_passes": 0,
+   "n2_blind_answer": "[100]",
+   "refsol_lines": "task7(): check_has_post -> False at L192; Observation?code=GLU&_count=5000 at L194; newest of any age at L200; ref_sol = [last_value if last_value is not None else -1] at L203; exact list comparison at L207"
+  }
+ }
+}

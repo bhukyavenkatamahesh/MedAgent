@@ -1,0 +1,24 @@
+# AUTHORED SOFTWARE TEST FIXTURE — not a benchmark policy and not a clinical rule.
+# It exists only to exercise the L1 sentinel-grounding semantics in tests. It is deliberately kept
+# out of policies/ so it can never be selected for a real run.
+policy_id: sentinel_probe_fixture
+version: "0.0"
+status: TEST_FIXTURE
+guarded_tools: []
+required_before_action: [magnesium_probe]
+evidence:
+  magnesium_probe:
+    codes: ["MG"]
+    absence_codes: ["MG"]
+    units: ["mg/dL"]
+    code_systems: ["http://loinc.org"]
+    max_age_hours: 24
+    satisfied_by_verified_absence: true
+    emit_check_label: true
+defer_keywords: []
+# L1 under test. In a real policy this must quote the task instruction; here it states plainly that
+# it is a fixture.
+sentinel_answers: [-1]
+sentinel_source: >-
+  TEST FIXTURE ONLY. Mirrors the shape of the MedAgentBench instruction "If a measurement does not
+  exist, return -1", but this file is not used to score any run.
