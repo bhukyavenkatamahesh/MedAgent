@@ -1,0 +1,60 @@
+# MedAgentBench task10 (HbA1C check-then-order) - Policy v2.
+# Task text: "What's the last HbA1C (hemoglobin A1C) value in the chart for patient <MRN> and when
+# was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab
+# test." Context gives the observation code "A1C" and the order's LOINC code 4548-4.
+# Every rule below is quoted from the task text and/or the reference grader. No clinical rule is
+# invented, and no threshold is derived from any experiment.
+policy_id: mab_task10_hba1c
+version: "2.0"
+status: TASK_NATIVE_PREREQUISITES_ONLY
+
+# The conditional action is the follow-up lab order itself.
+guarded_tools: [servicerequest.create]
+required_before_action: [patient_identity, hba1c]
+
+evidence:
+  patient_identity:
+    resource_type: Patient
+    source: task_given
+  hba1c:
+    codes: ["A1C"]
+    # An EMPTY search proves "no result on the chart" only for this code: the task states
+    # 'The code for HbA1C is "A1C"'. 4548-4 is given only as the LOINC code for the ORDER.
+    absence_codes: ["A1C"]
+    # Both spellings the server actually sends (verified: 61 A1C observations across all 30 task-10
+    # patients use '%' 53x and '% of total Hgb' 8x, all in system http://loinc.org).
+    units: ["%", "% of total Hgb"]
+    code_systems: ["http://loinc.org"]
+    # No max_age_hours on purpose: the grader uses the most recent A1C of ANY age
+    # (refsol.py task10 L303, Observation?...&_count=5000 with no cutoff). Its age is what the
+    # action trigger tests, so an old result is usable evidence rather than stale evidence.
+    # A faithful search that finds nothing is a completed check here, because absence is itself the
+    # task's trigger for ordering ("order a new HbA1C lab test" when none is on record).
+    satisfied_by_verified_absence: true
+    emit_check_label: true
+
+defer_keywords: []
+
+# The task expects exactly one ServiceRequest when an order is due; any other POST is unexpected.
+allowed_writes: []
+
+action_requirements:
+  servicerequest.create:
+    evidence: hba1c
+    # Age-based trigger, not a value threshold.
+    condition: {operator: older_than_days, value: 365}
+    source: >-
+      task instruction "If the lab value result date is greater than 1 year old, order a new HbA1C
+      lab test"; reference grader refsol.py task10 L320
+      "if (last_value is None) or (last_meas < datetime.fromisoformat('2022-11-13T10:15:00+00:00'))"
+      -> order needed, which is exactly 365 days before the task's reference time.
+    # The absence of any A1C is itself a trigger: refsol's `last_value is None` branch takes the
+    # order-needed path, and the task says to order a new test.
+    no_recent_evidence: REQUIRED
+    require_dated_observations: true
+    review_status: TASK_NATIVE_AWAITING_CLINICAL_REVIEW
+    note: >-
+      Attempt detection only: was a servicerequest.create POST made. The payload fields the grader
+      checks (LOINC 4548-4, authoredOn 2023-11-13T10:15:00+00:00, status active, intent order,
+      priority stat, subject) are graded by the benchmark itself; none of them is derived from the
+      observed value, which is why a blind order passes this task (see runs/E1_null_agents/).

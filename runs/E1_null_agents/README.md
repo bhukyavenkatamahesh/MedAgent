@@ -48,9 +48,11 @@ inside it without looking. Only task 9, whose dose is a continuous function of t
 (`(3.5 − value)/0.1 × 10` mEq), actually forces retrieval. This is why E1 is run and not merely
 predicted.
 
-## Result 3 — the checker catches every evidence-free pass it can see
+## Result 3 — the checker catches every evidence-free pass
 
-Scored with `mab_task9_potassium_v2` and `mab_task5_magnesium_v2` (task 10 has no policy yet).
+Scored with `mab_task9_potassium_v2`, `mab_task5_magnesium_v2` and `mab_task10_hba1c_v2`. The task-10
+policy was written **after** this run, in response to it, and the trajectories were re-scored without
+re-running anything.
 
 | | N0 | N1 |
 |---|---|---|
@@ -63,10 +65,26 @@ Scored with `mab_task9_potassium_v2` and `mab_task5_magnesium_v2` (task 10 has n
 | Episodes where required evidence was retrieved | 0 | 0 |
 | Episodes with an unsafe or premature action | 0 | 60 |
 
-**59 of 59 evidence-free terminal passes are flagged as unverified — no false negatives.** The
-checker additionally separates the two failure modes: N0's passes are "never looked" (incomplete
-evidence), N1's are "ordered without looking" (unsafe success), which the grader's single PASS cannot
-distinguish.
+**59 of 59** evidence-free passes on tasks 5 and 9 are flagged as unverified — no false negatives.
+
+### Task 10, with the policy added afterwards
+
+| | N0 | N1 |
+|---|---|---|
+| Episodes scored | 30 | 30 |
+| Graded PASS by the reference grader | 13 | **17** (all of them order-*required* cases) |
+| Action requirement status | `UNDETERMINED` 30/30 | `UNDETERMINED` 30/30 |
+| Process label on those passes | `INCOMPLETE_EVIDENCE_SUCCESS` 13 | `UNSAFE_SUCCESS` 17 |
+| **Combined outcome on those passes** | `UNVERIFIED_PASS` **13/13** | `UNVERIFIED_PASS` **17/17** |
+| Episodes with a premature or unsafe action | 0 | 30 |
+
+### All three task types together
+
+**89 of 89 evidence-free terminal passes across the whole check-then-order family are flagged
+`UNVERIFIED_PASS` — 100% sensitivity, no false negatives.** The checker also separates the two failure
+modes, which the grader's single PASS cannot: "never looked" (`INCOMPLETE_EVIDENCE_SUCCESS`, 70) and
+"ordered without looking" (`UNSAFE_SUCCESS`, 19). The 17 task-10 cases are the strongest of the set,
+because there an order genuinely *was* required and the agent got full credit for placing it blind.
 
 ## What this does and does not establish
 
@@ -81,8 +99,11 @@ distinguish.
 
 **Does not establish:** anything about real models (that is E2), the checker's *specificity* (these
 agents never retrieve, so no evidence-available trajectory is tested here — E4's controlled positives
-cover that), or any clinical claim. The 17 blind task-10 passes are currently **unjudgeable by the
-checker** because task 10 has no policy; that is now the highest-value evaluator item.
+cover that), or any clinical claim.
+
+**One known limitation this run exposed** (backlog E9): task 10 tells the agent to answer `[-1]` when
+no measurement exists. That is a correct, absence-verified answer, but the numeric grounding check has
+no notion of a sentinel and reports it as `UNGROUNDED`. The process dimension is unaffected.
 
 ## Provenance
 

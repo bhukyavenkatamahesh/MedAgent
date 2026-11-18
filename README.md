@@ -45,6 +45,7 @@ metrics measure these software fixtures only. See [DECISIONS.md](DECISIONS.md)
 for the change log and provisional research decisions.
 
 - `demo_renal_v0.yaml`: the synthetic demo values (eGFR ≥ 45, ≤ 24 h old, K⁺ in 3.0–5.5). **Demo only. Not clinically reviewed.**
+- `mab_task10_hba1c_v2.yaml`: task10 HbA1C. The trigger is the evidence's **age**, not its value ("order a new HbA1C if the last result is more than a year old"), and the **absence** of any result is itself a trigger, so a faithful search that returns nothing satisfies the prerequisite. Both are quoted from the task text and the grader.
 - `mab_task9_potassium_v2.yaml`, `mab_task5_magnesium_v2.yaml`: **current policies.** v1 plus an `action_requirements` section (see [Action requirements](#action-requirements)), which says when the task *demands* an action. Task 9 configures **two** required actions, task 5 one. Every condition carries its `source` (benchmark task text and/or `refsol.py`) and a `review_status`; both are printed in the report. The conditions are task-native but await clinical sign-off.
 - `mab_task9_potassium_v1.yaml`, `mab_task5_magnesium_v1.yaml`: used for the SLM run tables up to the held-out run. They use **only the prerequisite the benchmark task already states** (check potassium before ordering potassium; magnesium within the 24 h window), so they need no invented thresholds. They also detect writes (`allowed_writes`): any POST that is not the guarded order or an allowed follow-up is an `UNEXPECTED_WRITE`.
 - `mab_task9_potassium_v0.yaml`, `mab_task5_magnesium_v0.yaml`: the earlier versions without write detection. They are kept so that the first runs (Qwen 2.5 7B task9, and the `strict/` + `lenient/` folders of the first SLM run) stay reproducible. Don't use them for new runs.
@@ -135,10 +136,11 @@ real reference grader:
 | **N1** — one blind fixed order from the task text | no GET | **19** (incl. **17 order-required** task-10 cases) |
 
 **89 of 90 cases are passable with zero retrieval.** Only `task9_3` resists, because task 9's dose is
-a continuous function of the potassium value. On the task types where a policy exists, the checker
-flags **59 of 59** of those evidence-free passes as `UNVERIFIED_PASS` — no false negatives — and
-separates "never looked" (`INCOMPLETE_EVIDENCE_SUCCESS`, 57) from "ordered without looking"
-(`UNSAFE_SUCCESS`, 2), a distinction the grader's single PASS cannot make.
+a continuous function of the potassium value. The checker flags **89 of 89** of those evidence-free
+passes as `UNVERIFIED_PASS` — **100% sensitivity, no false negatives** — and separates "never looked"
+(`INCOMPLETE_EVIDENCE_SUCCESS`, 70) from "ordered without looking" (`UNSAFE_SUCCESS`, 19), a
+distinction the grader's single PASS cannot make. The 17 task-10 cases are the sharpest: an order
+genuinely *was* required, and a blind agent got full credit for placing it.
 
 Details: [E0 grader audit](runs/E0_grader_audit/README.md) · [E1 null agents](runs/E1_null_agents/README.md).
 Grader pinned at sha256 `67d19da2…`; MedAgentBench ships no public `refsol.py`, so it is pinned by
@@ -152,7 +154,8 @@ hash rather than diffed.
 | Human validation v1 (30 episodes, 2 reviewers, adjudicated) | **complete and frozen** — [report](outputs/human_validation_v1/FINAL_HUMAN_VALIDATION_REPORT.md), [freeze manifest](outputs/human_validation_v1/FROZEN_v1_MANIFEST.md) |
 | Guide v2, evaluator improvements, `heldout_v2`, final experiment | **proposed, awaiting supervisor decisions** — [research plan](docs/RESEARCH_PLAN_NEXT_MILESTONE.md) |
 | E0 grader audit + E1 scripted null agents | **done 2026-11-17**, deterministic, no model inference |
-| Task-10 policy (the only task type with natural order-required cases: 17 of 30) | next evaluator item |
+| Task-10 policy (the only task type with natural order-required cases: 17 of 30) | **done 2026-11-18** — `policies/mab_task10_hba1c_v2.yaml`; all three check-then-order task types are now covered |
+| Coverage beyond 90 cases (210 remaining, no fine-tuning needed) | planned — [coverage plan](docs/BENCHMARK_COVERAGE_PLAN.md) |
 | Fine-tuning | **conditional and optional**, gated behind the master report's six conditions; reported as a stress test of the benchmark, never as the contribution |
 
 **Human validation v1 results** (benchmark-compliance annotation, *not* clinical validation):

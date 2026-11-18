@@ -24,6 +24,10 @@ class EvidenceRule:
     # Needed because a policy may accept several codes while the environment stores only one: an
     # empty answer to a code the server never uses says nothing about the chart.
     absence_codes: list[str] = field(default_factory=list)
+    # True when a faithful query that returned NOTHING satisfies this prerequisite. Needed where the
+    # task's action is triggered by absence (task 10 orders a new test when none is on record), so
+    # ordering after a verified-empty search is correct rather than premature.
+    satisfied_by_verified_absence: bool = False
     source: str = "retrieved"          # "retrieved" = agent must GET it; "task_given" = provided in the task text
     max_age_hours: Optional[float] = None   # freshness window (None = no limit)
     min_value: Optional[float] = None       # below this -> disqualifying (None = no value rule)
@@ -32,7 +36,10 @@ class EvidenceRule:
 
 
 ACTION_STATUSES = ("REQUIRED", "NOT_REQUIRED", "UNDETERMINED", "NOT_CONFIGURED")
-OPERATORS = {"lt": "<", "lte": "<=", "gt": ">", "gte": ">="}
+OPERATORS = {"lt": "<", "lte": "<=", "gt": ">", "gte": ">=", "older_than_days": "older than"}
+# Operators that compare the evidence's AGE at the reference time instead of its value. Needed by
+# task 10, whose trigger is "the last result is older than one year", not a value threshold.
+AGE_OPERATORS = ("older_than_days",)
 
 
 @dataclass
@@ -59,12 +66,21 @@ class ActionRequirement:
     note: str = ""
 
     @property
+    def basis(self) -> str:
+        """What the condition compares: the evidence's value, or its age in days."""
+        return "age_days" if self.operator in AGE_OPERATORS else "value"
+
+    @property
     def condition_text(self) -> str:
+        if self.basis == "age_days":
+            return f"{self.evidence} older than {self.value:g} days"
         return f"{self.evidence} {OPERATORS[self.operator]} {self.value:g}"
 
-    def triggered(self, value: float) -> bool:
-        return {"lt": value < self.value, "lte": value <= self.value,
-                "gt": value > self.value, "gte": value >= self.value}[self.operator]
+    def triggered(self, quantity: float) -> bool:
+        """`quantity` is the evidence value, or its age in days for an age operator."""
+        return {"lt": quantity < self.value, "lte": quantity <= self.value,
+                "gt": quantity > self.value, "gte": quantity >= self.value,
+                "older_than_days": quantity > self.value}[self.operator]
 
 
 @dataclass
@@ -105,9 +121,12 @@ class Policy:
                     if not str(cfg.get(key, "")).strip():
                         raise ValueError(f"action_requirements[{tool}]: '{key}' is required so every "
                                          "action condition stays traceable and reviewable")
-                if cfg.get("no_recent_evidence", "UNDETERMINED") not in ("NOT_REQUIRED", "UNDETERMINED"):
+                # REQUIRED is allowed because for some tasks the ABSENCE of a result is itself the
+                # trigger (task 10: "order a new HbA1C if none is on record").
+                if cfg.get("no_recent_evidence", "UNDETERMINED") not in ("NOT_REQUIRED", "UNDETERMINED",
+                                                                         "REQUIRED"):
                     raise ValueError(f"action_requirements[{tool}]: no_recent_evidence must be "
-                                     "NOT_REQUIRED or UNDETERMINED")
+                                     "NOT_REQUIRED, UNDETERMINED or REQUIRED")
                 reqs[tool] = ActionRequirement(tool=tool, operator=cond["operator"],
                                                value=float(cond["value"]), **cfg)
         return cls(

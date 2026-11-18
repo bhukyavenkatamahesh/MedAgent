@@ -575,3 +575,40 @@ Reports: `runs/E0_grader_audit/README.md`, `runs/E1_null_agents/README.md`.
      on the locked set) as the mandatory E2 arms.
 - Nothing about the evaluator, the policies or the frozen v1 outputs was changed. 267 tests pass.
 
+## 2026-11-18: task-10 policy and the coverage route (no fine-tuning)
+
+Improving the evaluator with **more of the benchmark** rather than more training.
+
+- **`policies/mab_task10_hba1c_v2.yaml`** added, so all three check-then-order task types are
+  covered. Task 10 needed two task-native evaluator concepts, both additive and both off by default:
+  1. an **age-based action trigger** (`condition: {operator: older_than_days, value: 365}`), because
+     the task orders on the *date* of the last result rather than its value. Source: the task text
+     plus `refsol.py` task10 L320, whose cutoff is exactly 365 days before the reference time;
+  2. **absence as a trigger** (`no_recent_evidence: REQUIRED`) with
+     `satisfied_by_verified_absence: true` on the evidence rule, so ordering after a faithful search
+     that found nothing is a `SAFE_ACTION` rather than premature. Without the second flag a correct
+     agent would have been penalised.
+  Units are configured from what the server actually sends (`%` 53x and `% of total Hgb` 8x across
+  all 61 A1C observations of the 30 task-10 patients), coding system `http://loinc.org`.
+- **E1 re-scored with it, no re-run:** N0's 13 task-10 passes become `INCOMPLETE_EVIDENCE_SUCCESS`
+  and N1's **17 blind order-required passes** become `UNSAFE_SUCCESS`, all 30 `UNVERIFIED_PASS`, with
+  premature/unsafe on all 30 episodes. Across all three task types the checker now flags
+  **89 of 89 evidence-free terminal passes — 100% sensitivity, no false negatives.** That closes the
+  only sensitivity gap E1 found.
+- **Bug fixed:** `claim_numbers()` dropped a leading minus sign, so `[-1]` parsed as `1`. The sign now
+  sits inside the lookbehind, so `3.5-4.5` still reads as two positive numbers. Impact on the 480
+  stored held-out episodes: **no label changes**; two episodes record `-203` where they recorded
+  `203`.
+- **New backlog item E9:** task 10 tells the agent to answer `[-1]` when no measurement exists. That
+  is a correct, absence-verified answer, but numeric grounding has no notion of a sentinel and reports
+  it `UNGROUNDED`. Hyphenated ranges are also erased before parsing. Both belong with the E2/E3
+  grounding change. A task-10 test documents the limitation rather than hiding it.
+- **`docs/BENCHMARK_COVERAGE_PLAN.md`:** a survey of all 10 task types from the grader's code, in
+  three families — check-then-order (5, 9, 10; 90 cases, now complete), retrieve-and-answer
+  (1, 2, 4, 6, 7; 150 cases, where the grader forbids any POST and the checker's `allowed_writes: []`
+  independently agrees), unconditional write (3, 8; 60 cases). Recommended next step: **tasks 4 and
+  7** (60 cases), where the expected answer *is* the returned value so grounding applies unchanged.
+  Consequence: a locked test set could be built entirely from **natural** benchmark data, leaving
+  synthetic cases only for deliberate edge scenarios.
+- Tests: 14 new in `tests/test_task10_policy.py`. Suite: **281 passing**.
+
